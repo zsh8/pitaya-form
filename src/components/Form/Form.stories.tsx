@@ -68,10 +68,14 @@ HelloWorld.args = {
       description: "your first name",
       long_description: "enter your first name",
       default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
+      gid: "parent_group",
       options: {},
       events: {},
     },
   },
   styles: {},
-  groups: { header: {} },
+  groups: {
+    header: { name: "headers", gid: "parent_group" },
+    parent_group: { name: "parent", gid: "last parent" },
+  },
 };

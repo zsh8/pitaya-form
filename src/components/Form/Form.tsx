@@ -7,7 +7,7 @@ export interface PitayaFormProps {
   version: string;
   form: FormProps;
   styles?: object;
-  groups?: { [key: string]: GroupProps };
+  groups?: { [key: string]: RawGroupProps };
   actions?: { [key: string]: ActionProps[] };
   input?: object;
 }
@@ -15,7 +15,7 @@ interface FormProps {
   [key: string]: MetaFieldProps;
 }
 
-export interface GroupProps extends MetaFieldProps {
+export interface RawGroupProps extends MetaFieldProps {
   name?: string;
   description?: string;
   target_group?: string;
@@ -41,22 +41,32 @@ const Form = (props: PitayaFormProps) => {
 
     const simpleField = <SimpleField field_key={key} {...fieldProps} />;
 
-    if (gid === undefined) {
-      fieldsMap.set(`simple_${key}`, simpleField);
-    } else {
-      if (!fieldsMap.has(`group_${gid}`)) {
-        const {
-          array: g_array,
-          gid: g_gid,
-          order: g_order,
-          ...groupProps
-        } = props.groups?.[gid] || {};
-        groupProps.field_key = gid;
-        groupProps.children = [];
-        fieldsMap.set(`group_${gid}`, groupProps);
-      }
-      fieldsMap.get(`group_${gid}`).children.push(simpleField);
+    let currentGid = gid;
+    let groupStack = [];
+    while (currentGid) {
+      groupStack.push(currentGid);
+      currentGid = (props.groups?.[currentGid] || {}).gid || "";
     }
+    let parentChildren: Map<string, any> = fieldsMap;
+    while (groupStack.length > 0) {
+      currentGid = groupStack.pop() || "";
+      if (!parentChildren.has(`group_${currentGid}`)) {
+        const {
+          array: groupArray,
+          gid: groupGid,
+          order: groupOrder,
+          ...groupProps
+        } = props.groups?.[currentGid] || {};
+        groupProps["field_key"] = currentGid;
+        groupProps.children_map = new Map<string, any>();
+        parentChildren.set(`group_${currentGid}`, groupProps);
+
+        parentChildren = groupProps.children_map;
+      } else {
+        parentChildren = parentChildren.get(`group_${currentGid}`).children_map;
+      }
+    }
+    parentChildren.set(`simple_${key}`, simpleField);
   }
 
   let formFields = [];
@@ -64,12 +74,7 @@ const Form = (props: PitayaFormProps) => {
     if (key.startsWith("simple_")) {
       formFields.push(value);
     } else {
-      const { children, ...groupProps } = value;
-      formFields.push(
-        <GroupField field_key={key.replace(/^group_/i, "")} {...groupProps}>
-          {children}
-        </GroupField>
-      );
+      formFields.push(<GroupField {...value}></GroupField>);
     }
   }
   return <form>{formFields}</form>;
