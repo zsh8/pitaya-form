@@ -64,15 +64,17 @@ const SimpleField = (props: RawFieldProps) => {
   if (!("events" in fieldProps)) fieldProps.events = {};
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      {label === null ? (
-        <FieldComponent {...fieldProps} />
-      ) : (
-        <label>
-          {fieldProps.name} <FieldComponent {...fieldProps} />
-        </label>
-      )}
-    </Suspense>
+    <div className="simple_field">
+      <Suspense fallback={<div>Loading...</div>}>
+        {label === null ? (
+          <FieldComponent {...fieldProps} />
+        ) : (
+          <label>
+            {fieldProps.name} <FieldComponent {...fieldProps} />
+          </label>
+        )}
+      </Suspense>
+    </div>
   );
 };
 
