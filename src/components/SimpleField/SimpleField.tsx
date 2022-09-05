@@ -39,8 +39,7 @@ export interface RawFieldProps {
 export interface FieldProps {
   field_key: string;
   name: string;
-  description?: string;
-  long_description?: string;
+  elementAttrs: object;
   default: any;
   options: OptionsProps;
   events: object;
@@ -52,25 +51,49 @@ interface OptionsProps {
 }
 
 const SimpleField = (props: RawFieldProps) => {
-  const { type: field_type, ...fieldProps } = props;
+  const {
+    type: field_type,
+    description,
+    long_description,
+    ...otherProps
+  } = props;
+
+  let fieldProps: any = { ...otherProps };
 
   const componentName = FieldTypesMap[field_type ? field_type : "String"];
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
-
-  const label = fieldProps.name;
+  const withoutLabel = fieldProps.name === null;
+  fieldProps.name = fieldProps.name?.toString() || fieldProps.field_key;
   if (!("default" in fieldProps)) fieldProps.default = null;
   if (!("options" in fieldProps)) fieldProps.options = {};
   if (!("events" in fieldProps)) fieldProps.events = {};
 
+  fieldProps.elementAttrs = {
+    "aria-label": fieldProps.name,
+  };
+
+  if (description) {
+    let title = description.toString().slice(0, 120);
+    if (description.toString().length > 120) {
+      title = title + " ...";
+    }
+    fieldProps.elementAttrs.title = title;
+  }
+  const simpleField = <FieldComponent {...fieldProps} />;
+
   return (
     <div className="simple_field">
       <Suspense fallback={<div>Loading...</div>}>
-        {label === null ? (
-          <FieldComponent {...fieldProps} />
+        {withoutLabel ? (
+          simpleField
         ) : (
           <label>
-            {fieldProps.name} <FieldComponent {...fieldProps} />
+            {fieldProps.name.slice(0, 30)}
+            {long_description && (
+              <span className="question_icon" title={long_description}></span>
+            )}
+            {simpleField}
           </label>
         )}
       </Suspense>

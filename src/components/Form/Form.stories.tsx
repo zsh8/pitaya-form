@@ -64,10 +64,12 @@ HelloWorld.args = {
       events: {},
     },
     first_name: {
-      name: "first name",
-      description: "your first name",
+      name: "first name is more than 30 characters in length",
+      description:
+        "your first name is more than 120 characters in lengh so it should be shown ellipsis at the end or maybe it's not yet 120 I think so baby",
       long_description: "enter your first name",
       default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
+      array: true,
       gid: "parent_group",
       options: {},
       events: {},
@@ -75,7 +77,14 @@ HelloWorld.args = {
   },
   styles: {},
   groups: {
-    header: { name: "headers", gid: "parent_group" },
-    parent_group: { name: "parent", gid: "last parent" },
+    header: {
+      name: "headers",
+      gid: "parent_group",
+      description: "headers of this form",
+    },
+    parent_group: {
+      description: "parent with description without name",
+      gid: "last parent",
+    },
   },
 };

@@ -7,7 +7,7 @@ const TextField = (props: FieldProps) => {
     <input
       type="text"
       defaultValue={props.default || ""}
-      aria-label={props.name || props.field_key}
+      {...props.elementAttrs}
     />
   );
 };

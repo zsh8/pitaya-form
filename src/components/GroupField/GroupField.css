@@ -6,11 +6,11 @@ fieldset .simple_field {
   display: inline-block;
 }
 
-.without_legend > fieldset {
+.without_border > fieldset {
   border: 0;
   padding: 0;
 }
 
-.group_field.without_legend {
+.group_field.without_border {
   margin: 0;
 }

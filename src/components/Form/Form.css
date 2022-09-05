@@ -1,3 +1,15 @@
 form {
-  font-size: 11px;
+  font-size: 12px;
+}
+
+.question_icon {
+  background-image: url("../../assets/quest.png");
+}
+
+span[class$="_icon"] {
+  vertical-align: text-bottom;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin: 0 2px;
 }

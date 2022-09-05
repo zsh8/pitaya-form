@@ -8,7 +8,7 @@ const BooleanField = (props: FieldProps) => {
       type="checkbox"
       value={props.field_key}
       defaultChecked={props.default || false}
-      aria-label={props.name || props.field_key}
+      {...props.elementAttrs}
     />
   );
 };

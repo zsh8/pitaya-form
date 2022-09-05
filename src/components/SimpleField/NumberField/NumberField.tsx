@@ -3,12 +3,12 @@ import { FieldProps } from "..";
 import "./NumberField.css";
 
 const NumberField = (props: FieldProps) => {
-  interface Options {
+  const options: {
     step?: number;
     min?: number;
     max?: number;
-  }
-  const options: Options = {};
+    title?: string;
+  } = {};
 
   if (props.options.float) {
     options.step = 0.001;
@@ -25,8 +25,8 @@ const NumberField = (props: FieldProps) => {
     <input
       type="number"
       defaultValue={props.default || defaultValue}
-      aria-label={props.name || props.field_key}
       {...options}
+      {...props.elementAttrs}
     />
   );
 };
