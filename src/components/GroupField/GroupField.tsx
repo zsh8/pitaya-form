@@ -17,7 +17,7 @@ const GroupField = (props: GroupProps) => {
     if (key.startsWith("simple_")) {
       children.push(child);
     } else {
-      children.push(<GroupField {...child}></GroupField>);
+      children.push(<GroupField key={child.field_key} {...child}></GroupField>);
     }
   }
 

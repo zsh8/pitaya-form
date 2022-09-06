@@ -1,5 +1,7 @@
 import React from "react";
 import { lazy, Suspense } from "react";
+import { useState } from "react";
+import { v4 } from "uuid";
 import "./SimpleField.css";
 
 //type FieldType = "Boolean" | "Number" | "String" | "Choices" | "DateTime" | "File" | "Label" | "Password" | "Binary" | "Duration" | "Hostname" | "Port" | "PortRange" | "PrivateKey" | "RandomToken" | "Subnet" | "Location" | "TimePeriod" | "RavinUIUser";
@@ -32,6 +34,7 @@ export interface RawFieldProps {
   description?: string;
   long_description?: string;
   default?: any;
+  array?: boolean;
   options?: OptionsProps;
   events?: object;
 }
@@ -51,8 +54,10 @@ interface OptionsProps {
 }
 
 const SimpleField = (props: RawFieldProps) => {
-  const {
-    type: field_type,
+  let {
+    type: fieldType,
+    array,
+    default: fieldDefault,
     description,
     long_description,
     ...otherProps
@@ -60,12 +65,15 @@ const SimpleField = (props: RawFieldProps) => {
 
   let fieldProps: any = { ...otherProps };
 
-  const componentName = FieldTypesMap[field_type ? field_type : "String"];
+  const componentName = FieldTypesMap[fieldType ? fieldType : "String"];
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
-  const withoutLabel = fieldProps.name === null;
+  const showLabel = fieldProps.name !== null;
   fieldProps.name = fieldProps.name?.toString() || fieldProps.field_key;
-  if (!("default" in fieldProps)) fieldProps.default = null;
+  if (fieldDefault === undefined) fieldDefault = array ? [] : null;
+  if (array && !Array.isArray(fieldDefault)) {
+    fieldDefault = [fieldDefault];
+  }
   if (!("options" in fieldProps)) fieldProps.options = {};
   if (!("events" in fieldProps)) fieldProps.events = {};
 
@@ -80,24 +88,47 @@ const SimpleField = (props: RawFieldProps) => {
     }
     fieldProps.elementAttrs.title = title;
   }
-  const simpleField = <FieldComponent {...fieldProps} />;
+  const [value, setValue] = useState(fieldDefault);
+  function handleClone() {
+    const newValue = [...value, null];
+    setValue(newValue);
+  }
+
+  function handleRemove(index: number) {
+    let newValue = [...value];
+    newValue.splice(index, 1);
+    setValue(newValue);
+  }
 
   return (
-    <div className="simple_field">
-      <Suspense fallback={<div>Loading...</div>}>
-        {withoutLabel ? (
-          simpleField
-        ) : (
-          <label>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="simple_field" id={fieldProps.field_key}>
+        {showLabel && (
+          <label htmlFor={fieldProps.field_key}>
             {fieldProps.name.slice(0, 30)}
-            {long_description && (
-              <span className="question_icon" title={long_description}></span>
-            )}
-            {simpleField}
           </label>
         )}
-      </Suspense>
-    </div>
+        {long_description && (
+          <span className="question_icon" title={long_description}></span>
+        )}
+
+        {array ? (
+          <div className="array_simple_field">
+            {value.map((defaultValue: any, index: number) => (
+              <div key={v4()}>
+                <FieldComponent default={defaultValue} {...fieldProps} />
+                <span
+                  className="remove_icon"
+                  onClick={() => handleRemove(index)}></span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <FieldComponent default={value} {...fieldProps} />
+        )}
+        {array && <span className="clone_icon" onClick={handleClone}></span>}
+      </div>
+    </Suspense>
   );
 };
 

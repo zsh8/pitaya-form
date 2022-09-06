@@ -6,10 +6,18 @@ form {
   background-image: url("../../assets/quest.png");
 }
 
+.clone_icon {
+  background-image: url("../../assets/clone.png");
+}
+.remove_icon {
+  background-image: url("../../assets/remove.png");
+}
+
 span[class$="_icon"] {
   vertical-align: text-bottom;
   display: inline-block;
   width: 16px;
   height: 16px;
   margin: 0 2px;
+  cursor: pointer;
 }

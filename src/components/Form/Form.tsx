@@ -20,6 +20,7 @@ export interface RawGroupProps extends MetaFieldProps {
   description?: string;
   target_group?: string;
   default?: [object];
+  array?: boolean;
   events?: object;
 }
 type ActionKey = "remove" | "update" | "rpc" | "modal" | "submit";
@@ -28,7 +29,6 @@ type ActionProps = {
 };
 
 interface MetaFieldProps {
-  array?: boolean;
   gid?: string;
   order?: number;
   [key: string]: any;
@@ -37,9 +37,11 @@ interface MetaFieldProps {
 const Form = (props: PitayaFormProps) => {
   let fieldsMap = new Map<string, any>();
   for (const key in props.form) {
-    const { array, gid, order, ...fieldProps } = props.form[key];
+    const { gid, order, ...fieldProps } = props.form[key];
 
-    const simpleField = <SimpleField field_key={key} {...fieldProps} />;
+    const simpleField = (
+      <SimpleField key={key} field_key={key} {...fieldProps} />
+    );
 
     let currentGid = gid;
     let groupStack = [];
@@ -74,7 +76,9 @@ const Form = (props: PitayaFormProps) => {
     if (key.startsWith("simple_")) {
       formFields.push(value);
     } else {
-      formFields.push(<GroupField {...value}></GroupField>);
+      formFields.push(
+        <GroupField key={value.field_key} {...value}></GroupField>
+      );
     }
   }
   return <form>{formFields}</form>;
