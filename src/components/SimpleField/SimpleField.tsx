@@ -119,7 +119,9 @@ const SimpleField = (props: RawFieldProps) => {
                 <FieldComponent default={defaultValue} {...fieldProps} />
                 <span
                   className="remove_icon"
-                  onClick={() => handleRemove(index)}></span>
+                  onClick={() => handleRemove(index)}
+                  title={`remove this item of
+                   ${props.name || props.field_key}`}></span>
               </div>
             ))}
           </div>

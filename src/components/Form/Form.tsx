@@ -19,7 +19,7 @@ export interface RawGroupProps extends MetaFieldProps {
   name?: string;
   description?: string;
   target_group?: string;
-  default?: [object];
+  default?: object[];
   array?: boolean;
   events?: object;
 }
@@ -38,11 +38,7 @@ const Form = (props: PitayaFormProps) => {
   let fieldsMap = new Map<string, any>();
   for (const key in props.form) {
     const { gid, order, ...fieldProps } = props.form[key];
-
-    const simpleField = (
-      <SimpleField key={key} field_key={key} {...fieldProps} />
-    );
-
+    fieldProps.field_key = key;
     let currentGid = gid;
     let groupStack = [];
     while (currentGid) {
@@ -54,30 +50,31 @@ const Form = (props: PitayaFormProps) => {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
         const {
-          array: groupArray,
           gid: groupGid,
           order: groupOrder,
-          ...groupProps
+          ...groupFieldProps
         } = props.groups?.[currentGid] || {};
-        groupProps["field_key"] = currentGid;
-        groupProps.children_map = new Map<string, any>();
-        parentChildren.set(`group_${currentGid}`, groupProps);
+        groupFieldProps.field_key = currentGid;
+        groupFieldProps.children_map = new Map<string, any>();
+        parentChildren.set(`group_${currentGid}`, groupFieldProps);
 
-        parentChildren = groupProps.children_map;
+        parentChildren = groupFieldProps.children_map;
       } else {
         parentChildren = parentChildren.get(`group_${currentGid}`).children_map;
       }
     }
-    parentChildren.set(`simple_${key}`, simpleField);
+    parentChildren.set(`simple_${key}`, fieldProps);
   }
 
   let formFields = [];
-  for (const [key, value] of fieldsMap) {
+  for (const [key, fieldProps] of fieldsMap) {
     if (key.startsWith("simple_")) {
-      formFields.push(value);
+      formFields.push(
+        <SimpleField key={fieldProps.field_key} {...fieldProps} />
+      );
     } else {
       formFields.push(
-        <GroupField key={value.field_key} {...value}></GroupField>
+        <GroupField key={fieldProps.field_key} {...fieldProps}></GroupField>
       );
     }
   }

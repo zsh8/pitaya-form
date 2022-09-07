@@ -83,10 +83,17 @@ HelloWorld.args = {
       name: "headers",
       gid: "parent_group",
       description: "headers of this form",
+      array: true,
+      default: [
+        { port: 587, verify_ssl: [false, false, true, false] },
+        { port: 45, verify_ssl: [] },
+      ],
     },
     parent_group: {
       description: "parent with description without name",
       gid: "last parent",
+      array: true,
+      default: [{}],
     },
   },
 };
