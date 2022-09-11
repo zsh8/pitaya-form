@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, ChangeEvent } from "react";
 import { FieldProps } from "..";
 import "./NumberField.css";
 
@@ -16,17 +16,26 @@ const NumberField = (props: FieldProps) => {
   if (!props.options.signed) {
     options.min = 0;
   }
-  let defaultValue = 0;
-  if (options.min && options.min > 0) defaultValue = options.min;
-  if (defaultValue == 0 && options.max && options.max < 0)
-    defaultValue = options.max;
+
+  let initialValue = props.value;
+  if (typeof initialValue != "number") {
+    initialValue = 0;
+    if (options.min && options.min > 0) initialValue = options.min;
+    if (initialValue == 0 && options.max && options.max < 0)
+      initialValue = options.max;
+  }
+  const [value, setValue] = useState(initialValue);
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    setValue(e.target.value);
+  }
 
   return (
     <input
       type="number"
-      defaultValue={props.default || defaultValue}
+      value={value}
       {...options}
       {...props.elementAttrs}
+      onChange={handleChange}
     />
   );
 };

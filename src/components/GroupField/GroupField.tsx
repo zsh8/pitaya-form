@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { v4 } from "uuid";
 import "./GroupField.css";
-import { RawGroupProps } from "../Form/Form";
+import { RawGroupProps } from "../Form";
 import SimpleField from "../SimpleField";
 
 export interface GroupProps extends RawGroupProps {
@@ -20,25 +20,30 @@ const GroupField = (props: GroupProps) => {
     "aria-label": props.name?.toString() || props.field_key,
   };
 
-  let { array, default: rawDefault } = props;
+  let { array, default: rawDefault, value: initialValue } = props;
 
   let groupDefault: object[] = Array.isArray(rawDefault) ? rawDefault : [];
 
-  const [value, setValue] = useState(groupDefault);
+  if (initialValue === undefined) {
+    initialValue = groupDefault;
+  }
 
-  function makeChildren(defaultValue: any) {
+  const [value, setValue] = useState(initialValue);
+
+  function makeChildren(initialValue: any) {
     let children = [];
     for (const [key, fieldProps] of props.children_map) {
-      if (fieldProps.field_key in defaultValue) {
-        fieldProps.default = defaultValue[fieldProps.field_key];
+      let childProps = { ...fieldProps };
+      if (childProps.field_key in initialValue) {
+        childProps.value = initialValue[childProps.field_key];
       }
       if (key.startsWith("simple_")) {
         children.push(
-          <SimpleField key={fieldProps.field_key} {...fieldProps} />
+          <SimpleField key={childProps.field_key} {...childProps} />
         );
       } else {
         children.push(
-          <GroupField key={fieldProps.field_key} {...fieldProps}></GroupField>
+          <GroupField key={childProps.field_key} {...childProps}></GroupField>
         );
       }
     }
@@ -59,7 +64,7 @@ const GroupField = (props: GroupProps) => {
     <div className={classNames}>
       {array ? (
         <div className="array_simple_field">
-          {value.map((defaultValue: any, index: number) => (
+          {value.map((singleValue: any, index: number) => (
             <div key={v4()}>
               <fieldset {...elementAttrs}>
                 {(props.name || props.description) && (
@@ -72,7 +77,7 @@ const GroupField = (props: GroupProps) => {
                     )}
                   </legend>
                 )}
-                {makeChildren(defaultValue)}
+                {makeChildren(singleValue)}
               </fieldset>
               <span
                 className="remove_icon"
@@ -95,7 +100,7 @@ const GroupField = (props: GroupProps) => {
               )}
             </legend>
           )}
-          {makeChildren({})}
+          {makeChildren(value)}
         </fieldset>
       )}
       {array && <span className="clone_icon" onClick={handleClone}></span>}

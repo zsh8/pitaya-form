@@ -9,7 +9,7 @@ export interface PitayaFormProps {
   styles?: object;
   groups?: { [key: string]: RawGroupProps };
   actions?: { [key: string]: ActionProps[] };
-  input?: object;
+  input?: { [key: string]: any };
 }
 interface FormProps {
   [key: string]: MetaFieldProps;
@@ -35,10 +35,14 @@ interface MetaFieldProps {
 }
 
 const Form = (props: PitayaFormProps) => {
+  let input = props.input || ({} as { [key: string]: any });
   let fieldsMap = new Map<string, any>();
-  for (const key in props.form) {
-    const { gid, order, ...fieldProps } = props.form[key];
-    fieldProps.field_key = key;
+  for (const field_key in props.form) {
+    const { gid, order, ...fieldProps } = props.form[field_key];
+    fieldProps.field_key = field_key;
+    if (field_key in input) {
+      fieldProps.value = input[field_key];
+    }
     let currentGid = gid;
     let groupStack = [];
     while (currentGid) {
@@ -55,6 +59,9 @@ const Form = (props: PitayaFormProps) => {
           ...groupFieldProps
         } = props.groups?.[currentGid] || {};
         groupFieldProps.field_key = currentGid;
+        if (currentGid in input) {
+          groupFieldProps.value = input[currentGid];
+        }
         groupFieldProps.children_map = new Map<string, any>();
         parentChildren.set(`group_${currentGid}`, groupFieldProps);
 
@@ -63,7 +70,7 @@ const Form = (props: PitayaFormProps) => {
         parentChildren = parentChildren.get(`group_${currentGid}`).children_map;
       }
     }
-    parentChildren.set(`simple_${key}`, fieldProps);
+    parentChildren.set(`simple_${field_key}`, fieldProps);
   }
 
   let formFields = [];

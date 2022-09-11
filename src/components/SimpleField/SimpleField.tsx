@@ -34,6 +34,7 @@ export interface RawFieldProps {
   description?: string;
   long_description?: string;
   default?: any;
+  value?: any;
   array?: boolean;
   options?: OptionsProps;
   events?: object;
@@ -44,6 +45,7 @@ export interface FieldProps {
   name: string;
   elementAttrs: object;
   default: any;
+  value: any;
   options: OptionsProps;
   events: object;
 }
@@ -57,7 +59,7 @@ const SimpleField = (props: RawFieldProps) => {
   let {
     type: fieldType,
     array,
-    default: fieldDefault,
+    value: initialValue,
     description,
     long_description,
     ...otherProps
@@ -70,10 +72,8 @@ const SimpleField = (props: RawFieldProps) => {
   const FieldComponent = lazy(() => import(`./${componentName}`));
   const showLabel = fieldProps.name !== null;
   fieldProps.name = fieldProps.name?.toString() || fieldProps.field_key;
-  if (fieldDefault === undefined) fieldDefault = array ? [] : null;
-  if (array && !Array.isArray(fieldDefault)) {
-    fieldDefault = [fieldDefault];
-  }
+  if (fieldProps.default === undefined) fieldProps.default = null;
+
   if (!("options" in fieldProps)) fieldProps.options = {};
   if (!("events" in fieldProps)) fieldProps.events = {};
 
@@ -88,7 +88,15 @@ const SimpleField = (props: RawFieldProps) => {
     }
     fieldProps.elementAttrs.title = title;
   }
-  const [value, setValue] = useState(fieldDefault);
+  if (initialValue === undefined) {
+    initialValue = fieldProps.default;
+    if (array && !Array.isArray(initialValue)) {
+      initialValue = [];
+    }
+  }
+
+  const [value, setValue] = useState(initialValue);
+
   function handleClone() {
     const newValue = [...value, null];
     setValue(newValue);
@@ -114,9 +122,9 @@ const SimpleField = (props: RawFieldProps) => {
 
         {array ? (
           <div className="array_simple_field">
-            {value.map((defaultValue: any, index: number) => (
+            {value.map((singleValue: any, index: number) => (
               <div key={v4()}>
-                <FieldComponent default={defaultValue} {...fieldProps} />
+                <FieldComponent value={singleValue} {...fieldProps} />
                 <span
                   className="remove_icon"
                   onClick={() => handleRemove(index)}
@@ -126,7 +134,7 @@ const SimpleField = (props: RawFieldProps) => {
             ))}
           </div>
         ) : (
-          <FieldComponent default={value} {...fieldProps} />
+          <FieldComponent value={value} {...fieldProps} />
         )}
         {array && <span className="clone_icon" onClick={handleClone}></span>}
       </div>

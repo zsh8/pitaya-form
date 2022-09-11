@@ -76,6 +76,10 @@ HelloWorld.args = {
       options: {},
       events: {},
     },
+    single_field: {
+      default: "default value",
+      gid: "test_group",
+    },
   },
   styles: {},
   groups: {
@@ -95,5 +99,12 @@ HelloWorld.args = {
       array: true,
       default: [{}],
     },
+    test_group: { name: "test group" },
+  },
+  input: {
+    host: "evaaa",
+    header: [{ port: 1000, verify_ssl: [true, false, true] }, {}],
+    test_group: { single_field: "group value" },
+    single_field: "single value",
   },
 };
