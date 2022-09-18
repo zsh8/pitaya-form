@@ -1,11 +1,10 @@
 .simple_field {
   margin: 0 5px 5px 0;
 }
-
-.array_simple_field > div {
-  display: block;
+.simple_field > label {
+  margin: 0 2px;
 }
 
-.array_simple_field > div > * {
-  display: inline-block;
+.simple_field {
+  display: flex;
 }

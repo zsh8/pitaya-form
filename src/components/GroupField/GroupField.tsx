@@ -11,11 +11,6 @@ export interface GroupProps extends RawGroupProps {
 }
 
 const GroupField = (props: GroupProps) => {
-  let classNames = "group_field";
-  if (!props.name && !props.description) {
-    classNames = classNames + " without_border";
-  }
-
   let elementAttrs: any = {
     "aria-label": props.name?.toString() || props.field_key,
   };
@@ -59,13 +54,15 @@ const GroupField = (props: GroupProps) => {
     newValue.splice(index, 1);
     setValue(newValue);
   }
-
+  if (!array && !props.name && !props.description) {
+    elementAttrs.className = "without_border";
+  }
   return (
-    <div className={classNames}>
+    <div className="group_field">
       {array ? (
-        <div className="array_simple_field">
+        <div className="array_field">
           {value.map((singleValue: any, index: number) => (
-            <div key={v4()}>
+            <div key={v4()} className="removable">
               <fieldset {...elementAttrs}>
                 {(props.name || props.description) && (
                   <legend>
@@ -87,6 +84,7 @@ const GroupField = (props: GroupProps) => {
                 }`}></span>
             </div>
           ))}
+          <span className="clone_icon" onClick={handleClone}></span>
         </div>
       ) : (
         <fieldset {...elementAttrs}>
@@ -103,7 +101,6 @@ const GroupField = (props: GroupProps) => {
           {makeChildren(value)}
         </fieldset>
       )}
-      {array && <span className="clone_icon" onClick={handleClone}></span>}
     </div>
   );
 };

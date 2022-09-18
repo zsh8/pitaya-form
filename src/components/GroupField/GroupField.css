@@ -2,15 +2,13 @@
   margin: 0 5px 5px 0;
 }
 
-fieldset .simple_field {
-  display: inline-block;
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
-.without_border > fieldset {
+fieldset.without_border {
   border: 0;
   padding: 0;
-}
-
-.group_field.without_border {
-  margin: 0;
 }

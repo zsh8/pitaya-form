@@ -1,5 +1,8 @@
 form {
   font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .question_icon {
@@ -20,4 +23,13 @@ span[class$="_icon"] {
   height: 16px;
   margin: 0 2px;
   cursor: pointer;
+}
+.removable {
+  display: flex;
+  align-items: flex-end;
+  margin: 0 3px 3px 0;
+}
+.array_field {
+  display: flex;
+  flex-direction: column;
 }

@@ -121,9 +121,9 @@ const SimpleField = (props: RawFieldProps) => {
         )}
 
         {array ? (
-          <div className="array_simple_field">
+          <div className="array_field">
             {value.map((singleValue: any, index: number) => (
-              <div key={v4()}>
+              <div key={v4()} className="removable">
                 <FieldComponent value={singleValue} {...fieldProps} />
                 <span
                   className="remove_icon"
@@ -132,11 +132,11 @@ const SimpleField = (props: RawFieldProps) => {
                    ${props.name || props.field_key}`}></span>
               </div>
             ))}
+            {<span className="clone_icon" onClick={handleClone}></span>}
           </div>
         ) : (
           <FieldComponent value={value} {...fieldProps} />
         )}
-        {array && <span className="clone_icon" onClick={handleClone}></span>}
       </div>
     </Suspense>
   );
