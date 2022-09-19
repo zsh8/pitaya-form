@@ -96,15 +96,19 @@ HelloWorld.args = {
     parent_group: {
       description: "parent with description without name",
       gid: "last parent",
-      array: true,
-      default: [{}],
+      array: false,
     },
-    test_group: { name: "test group" },
+    test_group: { name: "test group", target_group: null },
   },
   input: {
     host: "evaaa",
-    header: [{ port: 1000, verify_ssl: [true, false, true] }, {}],
+    "last parent": {
+      parent_group: {
+        header: [{ port: 1000, verify_ssl: [true, false, true] }, {}],
+      },
+    },
     test_group: { single_field: "group value" },
-    single_field: "single value",
+    single_field:
+      "single value should not be seen if target_group of test_group is not null",
   },
 };

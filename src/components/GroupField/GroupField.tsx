@@ -29,10 +29,18 @@ const GroupField = (props: GroupProps) => {
     let children = [];
     for (const [key, fieldProps] of props.children_map) {
       let childProps = { ...fieldProps };
-      if (childProps.field_key in initialValue) {
-        childProps.value = initialValue[childProps.field_key];
+      let childIsSimple = key.startsWith("simple_");
+
+      if (!childIsSimple && childProps.target_group === null)
+        childProps.value = { ...initialValue };
+      else {
+        let dataModelKey = childProps.target_group || childProps.field_key;
+        if (dataModelKey in initialValue) {
+          childProps.value = initialValue[dataModelKey];
+        }
       }
-      if (key.startsWith("simple_")) {
+
+      if (childIsSimple) {
         children.push(
           <SimpleField key={childProps.field_key} {...childProps} />
         );

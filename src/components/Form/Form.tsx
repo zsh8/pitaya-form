@@ -18,7 +18,7 @@ interface FormProps {
 export interface RawGroupProps extends MetaFieldProps {
   name?: string;
   description?: string;
-  target_group?: string;
+  target_group?: string | null;
   default?: object[];
   array?: boolean;
   events?: object;
@@ -35,21 +35,29 @@ interface MetaFieldProps {
 }
 
 const Form = (props: PitayaFormProps) => {
-  let input = props.input || ({} as { [key: string]: any });
+  const rootGroup = "_root";
+  const dataModelRoot = props.groups?.[rootGroup]?.target_group;
+  let initialValue =
+    (dataModelRoot ? props.input?.[dataModelRoot] : props.input) ||
+    ({} as { [key: string]: any });
   let fieldsMap = new Map<string, any>();
   for (const field_key in props.form) {
-    const { gid, order, ...fieldProps } = props.form[field_key];
+    const { gid = rootGroup, order, ...fieldProps } = props.form[field_key];
     fieldProps.field_key = field_key;
-    if (field_key in input) {
-      fieldProps.value = input[field_key];
+    if (
+      (gid === rootGroup || props.groups?.[gid]?.target_group === null) &&
+      field_key in initialValue
+    ) {
+      fieldProps.value = initialValue[field_key];
     }
-    let currentGid = gid;
+    let currentGid: string = gid;
     let groupStack = [];
-    while (currentGid) {
+    while (currentGid !== rootGroup) {
       groupStack.push(currentGid);
-      currentGid = (props.groups?.[currentGid] || {}).gid || "";
+      currentGid = props.groups?.[currentGid]?.gid || rootGroup;
     }
     let parentChildren: Map<string, any> = fieldsMap;
+    let parentInitialValue = initialValue;
     while (groupStack.length > 0) {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
@@ -59,13 +67,20 @@ const Form = (props: PitayaFormProps) => {
           ...groupFieldProps
         } = props.groups?.[currentGid] || {};
         groupFieldProps.field_key = currentGid;
-        if (currentGid in input) {
-          groupFieldProps.value = input[currentGid];
+
+        if (groupFieldProps.target_group === null)
+          groupFieldProps.value = { ...parentInitialValue };
+        else {
+          const dataModelKey = groupFieldProps.target_group || currentGid;
+          if (dataModelKey in parentInitialValue) {
+            groupFieldProps.value = parentInitialValue[dataModelKey];
+          }
         }
         groupFieldProps.children_map = new Map<string, any>();
         parentChildren.set(`group_${currentGid}`, groupFieldProps);
 
         parentChildren = groupFieldProps.children_map;
+        parentInitialValue = groupFieldProps.value || {};
       } else {
         parentChildren = parentChildren.get(`group_${currentGid}`).children_map;
       }
