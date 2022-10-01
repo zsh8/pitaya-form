@@ -99,16 +99,19 @@ HelloWorld.args = {
       array: false,
     },
     test_group: { name: "test group", target_group: null },
+    _root: { target_group: "main" },
   },
   input: {
-    host: "evaaa",
-    "last parent": {
-      parent_group: {
-        header: [{ port: 1000, verify_ssl: [true, false, true] }, {}],
+    main: {
+      host: "evaaa",
+      "last parent": {
+        parent_group: {
+          header: [{ port: 1000, verify_ssl: [true, false, true] }, {}],
+        },
       },
+      test_group: { single_field: "group value" },
+      single_field:
+        "single value should not be seen if target_group of test_group is not null",
     },
-    test_group: { single_field: "group value" },
-    single_field:
-      "single value should not be seen if target_group of test_group is not null",
   },
 };

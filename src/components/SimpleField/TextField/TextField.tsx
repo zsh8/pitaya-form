@@ -1,20 +1,12 @@
-import React, { useState, ChangeEvent } from "react";
+import React from "react";
 import { FieldProps } from "..";
 import "./TextField.css";
 
 const TextField = (props: FieldProps) => {
-  const [value, setValue] = useState(props.value || "");
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value);
-  }
+  const initialValue = props.value || "";
 
   return (
-    <input
-      type="text"
-      value={value}
-      {...props.elementAttrs}
-      onChange={handleChange}
-    />
+    <input type="text" defaultValue={initialValue} {...props.elementAttrs} />
   );
 };
 

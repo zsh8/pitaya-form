@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer } from "react";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
 import "./Form.css";
@@ -11,8 +11,8 @@ export interface PitayaFormProps {
   actions?: { [key: string]: ActionProps[] };
   input?: { [key: string]: any };
 }
-interface FormProps {
-  [key: string]: MetaFieldProps;
+interface FormProps extends MetaFieldProps {
+  [key: string]: any;
 }
 
 export interface RawGroupProps extends MetaFieldProps {
@@ -22,6 +22,7 @@ export interface RawGroupProps extends MetaFieldProps {
   default?: object[];
   array?: boolean;
   events?: object;
+  handleDataModelChange: any;
 }
 type ActionKey = "remove" | "update" | "rpc" | "modal" | "submit";
 type ActionProps = {
@@ -31,19 +32,38 @@ type ActionProps = {
 interface MetaFieldProps {
   gid?: string;
   order?: number;
-  [key: string]: any;
 }
 
 const Form = (props: PitayaFormProps) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // Preventing the page from reloading
+    event.preventDefault();
+  };
+
   const rootGroup = "_root";
   const dataModelRoot = props.groups?.[rootGroup]?.target_group;
-  let initialValue =
-    (dataModelRoot ? props.input?.[dataModelRoot] : props.input) ||
-    ({} as { [key: string]: any });
+  const initialDataModel =
+    props.input || (dataModelRoot ? { [dataModelRoot]: {} } : {});
+  let initialValue = dataModelRoot
+    ? initialDataModel[dataModelRoot]
+    : initialDataModel;
+
+  const [dataModel, setDataModel] = useReducer(
+    (dataModel: { [key: string]: any }, updates: { [key: string]: any }) => {
+      if (dataModelRoot)
+        return { [dataModelRoot]: { ...dataModel[dataModelRoot], ...updates } };
+      else return { ...dataModel, ...updates };
+    },
+    initialDataModel
+  );
+
   let fieldsMap = new Map<string, any>();
   for (const field_key in props.form) {
     const { gid = rootGroup, order, ...fieldProps } = props.form[field_key];
     fieldProps.field_key = field_key;
+    if (gid === rootGroup)
+      fieldProps.handleDataModelChange = (updates: any) =>
+        setDataModel(updates);
     if (
       (gid === rootGroup || props.groups?.[gid]?.target_group === null) &&
       field_key in initialValue
@@ -62,14 +82,19 @@ const Form = (props: PitayaFormProps) => {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
         const {
-          gid: groupGid,
+          gid: groupGid = rootGroup,
           order: groupOrder,
           ...groupFieldProps
         } = props.groups?.[currentGid] || {};
         groupFieldProps.field_key = currentGid;
+        if (groupGid === rootGroup)
+          groupFieldProps.handleDataModelChange = (updates: any) =>
+            setDataModel(updates);
 
         if (groupFieldProps.target_group === null)
-          groupFieldProps.value = { ...parentInitialValue };
+          groupFieldProps.value = groupFieldProps.array
+            ? {}
+            : { ...parentInitialValue };
         else {
           const dataModelKey = groupFieldProps.target_group || currentGid;
           if (dataModelKey in parentInitialValue) {
@@ -100,7 +125,15 @@ const Form = (props: PitayaFormProps) => {
       );
     }
   }
-  return <form>{formFields}</form>;
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        {formFields}
+        <button type="submit">save</button>
+      </form>
+      <pre>{JSON.stringify(dataModel, undefined, 2)}</pre>
+    </>
+  );
 };
 
 export default Form;

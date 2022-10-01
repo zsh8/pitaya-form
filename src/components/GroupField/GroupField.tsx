@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer } from "react";
 import { useState } from "react";
 import { v4 } from "uuid";
 import "./GroupField.css";
@@ -8,6 +8,7 @@ import SimpleField from "../SimpleField";
 export interface GroupProps extends RawGroupProps {
   field_key: string;
   children_map: any;
+  value?: any;
 }
 
 const GroupField = (props: GroupProps) => {
@@ -22,13 +23,55 @@ const GroupField = (props: GroupProps) => {
   if (initialValue === undefined) {
     initialValue = groupDefault;
   }
+  interface ChangeAction {
+    type: "clone" | "remove" | "update";
+    index?: number;
+    updates?: any;
+  }
+  let [value, setValue] = useReducer((value: any, action: ChangeAction) => {
+    let newValue;
+    switch (action.type) {
+      case "clone":
+        newValue = [...value, {}];
+        break;
+      case "remove":
+        newValue = [...value];
+        newValue.splice(action.index, 1);
+        break;
+      case "update":
+        if (action.index !== undefined) {
+          newValue = [...value];
+          newValue.splice(action.index, 1, {
+            ...value[action.index],
+            ...action.updates,
+          });
+        } else
+          newValue =
+            props.target_group === null
+              ? { ...action.updates }
+              : { ...value, ...action.updates };
+        break;
+      default:
+        newValue = value;
+    }
+    let dataModel = {};
+    if (props.target_group === null) dataModel = { ...newValue };
+    else dataModel = { [props.target_group || props.field_key]: newValue };
+    props.handleDataModelChange(dataModel);
+    return newValue;
+  }, initialValue);
 
-  const [value, setValue] = useState(initialValue);
-
-  function makeChildren(initialValue: any) {
+  function makeChildren(initialValue: any, index?: number) {
     let children = [];
     for (const [key, fieldProps] of props.children_map) {
       let childProps = { ...fieldProps };
+
+      childProps.handleDataModelChange = (updates: any) =>
+        setValue({
+          ...(index === undefined ? {} : { index }),
+          type: "update",
+          updates: updates,
+        });
       let childIsSimple = key.startsWith("simple_");
 
       if (!childIsSimple && childProps.target_group === null)
@@ -52,16 +95,7 @@ const GroupField = (props: GroupProps) => {
     }
     return children;
   }
-  function handleClone() {
-    const newValue = [...value, {}];
-    setValue(newValue);
-  }
 
-  function handleRemove(index: number) {
-    let newValue = [...value];
-    newValue.splice(index, 1);
-    setValue(newValue);
-  }
   if (!array && !props.name && !props.description) {
     elementAttrs.className = "without_border";
   }
@@ -82,17 +116,19 @@ const GroupField = (props: GroupProps) => {
                     )}
                   </legend>
                 )}
-                {makeChildren(singleValue)}
+                {makeChildren(singleValue, index)}
               </fieldset>
               <span
                 className="remove_icon"
-                onClick={() => handleRemove(index)}
+                onClick={() => setValue({ type: "remove", index })}
                 title={`remove this item of ${
                   props.name || props.field_key
                 }`}></span>
             </div>
           ))}
-          <span className="clone_icon" onClick={handleClone}></span>
+          <span
+            className="clone_icon"
+            onClick={() => setValue({ type: "clone" })}></span>
         </div>
       ) : (
         <fieldset {...elementAttrs}>

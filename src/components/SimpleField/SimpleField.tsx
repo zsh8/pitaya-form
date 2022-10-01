@@ -1,6 +1,4 @@
-import React from "react";
-import { lazy, Suspense } from "react";
-import { useState } from "react";
+import React, { lazy, Suspense, useReducer, ChangeEvent } from "react";
 import { v4 } from "uuid";
 import "./SimpleField.css";
 
@@ -33,6 +31,7 @@ export interface RawFieldProps {
   name?: string;
   description?: string;
   long_description?: string;
+  handleDataModelChange: any;
   default?: any;
   value?: any;
   array?: boolean;
@@ -62,6 +61,7 @@ const SimpleField = (props: RawFieldProps) => {
     value: initialValue,
     description,
     long_description,
+    handleDataModelChange,
     ...otherProps
   } = props;
 
@@ -94,8 +94,10 @@ const SimpleField = (props: RawFieldProps) => {
       initialValue = [];
     }
   }
-
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useReducer((value: any, newValue: any) => {
+    handleDataModelChange({ [fieldProps.field_key]: newValue });
+    return newValue;
+  }, initialValue);
 
   function handleClone() {
     const newValue = [...value, null];
@@ -105,6 +107,21 @@ const SimpleField = (props: RawFieldProps) => {
   function handleRemove(index: number) {
     let newValue = [...value];
     newValue.splice(index, 1);
+    setValue(newValue);
+  }
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>, index?: number) {
+    let fieldValue =
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.type === "number"
+        ? event.target.valueAsNumber
+        : event.target.value;
+    let newValue: any = fieldValue;
+    if (array) {
+      newValue = [...value];
+      newValue.splice(index, 1, fieldValue);
+    }
     setValue(newValue);
   }
 
@@ -124,7 +141,14 @@ const SimpleField = (props: RawFieldProps) => {
           <div className="array_field">
             {value.map((singleValue: any, index: number) => (
               <div key={v4()} className="removable">
-                <FieldComponent value={singleValue} {...fieldProps} />
+                <FieldComponent
+                  value={singleValue}
+                  {...fieldProps}
+                  elementAttrs={{
+                    ...fieldProps.elementAttrs,
+                    onChange: (event: any) => handleChange(event, index),
+                  }}
+                />
                 <span
                   className="remove_icon"
                   onClick={() => handleRemove(index)}
@@ -135,7 +159,14 @@ const SimpleField = (props: RawFieldProps) => {
             {<span className="clone_icon" onClick={handleClone}></span>}
           </div>
         ) : (
-          <FieldComponent value={value} {...fieldProps} />
+          <FieldComponent
+            value={value}
+            {...fieldProps}
+            elementAttrs={{
+              ...fieldProps.elementAttrs,
+              onChange: handleChange,
+            }}
+          />
         )}
       </div>
     </Suspense>

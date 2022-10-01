@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React from "react";
 import { FieldProps } from "..";
 import "./NumberField.css";
 
@@ -24,18 +24,13 @@ const NumberField = (props: FieldProps) => {
     if (initialValue == 0 && options.max && options.max < 0)
       initialValue = options.max;
   }
-  const [value, setValue] = useState(initialValue);
-  function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value);
-  }
 
   return (
     <input
       type="number"
-      value={value}
+      defaultValue={initialValue}
       {...options}
       {...props.elementAttrs}
-      onChange={handleChange}
     />
   );
 };
