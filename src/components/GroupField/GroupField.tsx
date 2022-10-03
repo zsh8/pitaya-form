@@ -16,7 +16,7 @@ const GroupField = (props: GroupProps) => {
     "aria-label": props.name?.toString() || props.field_key,
   };
 
-  let { array, default: rawDefault, value: initialValue } = props;
+  let { array, default: rawDefault, value: initialValue, order } = props;
 
   let groupDefault: object[] = Array.isArray(rawDefault) ? rawDefault : [];
 
@@ -100,7 +100,7 @@ const GroupField = (props: GroupProps) => {
     elementAttrs.className = "without_border";
   }
   return (
-    <div className="group_field">
+    <div className="group_field" style={order === undefined ? {} : { order }}>
       {array ? (
         <div className="array_field">
           {value.map((singleValue: any, index: number) => (

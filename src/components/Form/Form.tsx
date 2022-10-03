@@ -5,22 +5,21 @@ import "./Form.css";
 
 export interface PitayaFormProps {
   version: string;
-  form: FormProps;
+  form: { [key: string]: any };
   styles?: object;
   groups?: { [key: string]: RawGroupProps };
   actions?: { [key: string]: ActionProps[] };
   input?: { [key: string]: any };
 }
-interface FormProps extends MetaFieldProps {
-  [key: string]: any;
-}
 
-export interface RawGroupProps extends MetaFieldProps {
+export interface RawGroupProps {
   name?: string;
   description?: string;
   target_group?: string | null;
   default?: object[];
+  gid?: string;
   array?: boolean;
+  order?: number;
   events?: object;
   handleDataModelChange: any;
 }
@@ -28,11 +27,6 @@ type ActionKey = "remove" | "update" | "rpc" | "modal" | "submit";
 type ActionProps = {
   [key in ActionKey]: object;
 };
-
-interface MetaFieldProps {
-  gid?: string;
-  order?: number;
-}
 
 const Form = (props: PitayaFormProps) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -59,7 +53,7 @@ const Form = (props: PitayaFormProps) => {
 
   let fieldsMap = new Map<string, any>();
   for (const field_key in props.form) {
-    const { gid = rootGroup, order, ...fieldProps } = props.form[field_key];
+    const { gid = rootGroup, ...fieldProps } = props.form[field_key];
     fieldProps.field_key = field_key;
     if (gid === rootGroup)
       fieldProps.handleDataModelChange = (updates: any) =>
@@ -81,11 +75,8 @@ const Form = (props: PitayaFormProps) => {
     while (groupStack.length > 0) {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
-        const {
-          gid: groupGid = rootGroup,
-          order: groupOrder,
-          ...groupFieldProps
-        } = props.groups?.[currentGid] || {};
+        const { gid: groupGid = rootGroup, ...groupFieldProps } =
+          props.groups?.[currentGid] || {};
         groupFieldProps.field_key = currentGid;
         if (groupGid === rootGroup)
           groupFieldProps.handleDataModelChange = (updates: any) =>
@@ -127,10 +118,8 @@ const Form = (props: PitayaFormProps) => {
   }
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        {formFields}
-        <button type="submit">save</button>
-      </form>
+      <form onSubmit={handleSubmit}>{formFields}</form>
+      <button type="submit">save</button>
       <pre>{JSON.stringify(dataModel, undefined, 2)}</pre>
     </>
   );

@@ -35,6 +35,7 @@ export interface RawFieldProps {
   default?: any;
   value?: any;
   array?: boolean;
+  order?: number;
   options?: OptionsProps;
   events?: object;
 }
@@ -59,6 +60,7 @@ const SimpleField = (props: RawFieldProps) => {
     type: fieldType,
     array,
     value: initialValue,
+    order,
     description,
     long_description,
     handleDataModelChange,
@@ -127,7 +129,10 @@ const SimpleField = (props: RawFieldProps) => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="simple_field" id={fieldProps.field_key}>
+      <div
+        className="simple_field"
+        id={fieldProps.field_key}
+        style={order === undefined ? {} : { order }}>
         {showLabel && (
           <label htmlFor={fieldProps.field_key}>
             {fieldProps.name.slice(0, 30)}
