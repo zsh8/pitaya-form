@@ -1,4 +1,5 @@
 import React from "react";
+import { InputNumber } from "antd";
 import { FieldProps } from "..";
 import "./NumberField.css";
 
@@ -17,22 +18,13 @@ const NumberField = (props: FieldProps) => {
     options.min = 0;
   }
 
-  let initialValue = props.value;
-  if (typeof initialValue != "number") {
-    initialValue = 0;
-    if (options.min && options.min > 0) initialValue = options.min;
-    if (initialValue == 0 && options.max && options.max < 0)
-      initialValue = options.max;
+  let value = props.value;
+  if (value == 0) {
+    if (options.min && options.min > 0) value = options.min;
+    if (value == 0 && options.max && options.max < 0) value = options.max;
   }
 
-  return (
-    <input
-      type="number"
-      defaultValue={initialValue}
-      {...options}
-      {...props.elementAttrs}
-    />
-  );
+  return <InputNumber value={value} onChange={props.onChange} {...options} />;
 };
 
 export default NumberField;

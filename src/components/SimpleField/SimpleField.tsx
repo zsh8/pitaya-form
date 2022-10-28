@@ -1,39 +1,42 @@
-import React, { lazy, Suspense, useReducer, ChangeEvent } from "react";
-import { v4 } from "uuid";
+import React, { lazy, Suspense } from "react";
+import { Form, Button, Space } from "antd";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import "./SimpleField.css";
 
 //type FieldType = "Boolean" | "Number" | "String" | "Choices" | "DateTime" | "File" | "Label" | "Password" | "Binary" | "Duration" | "Hostname" | "Port" | "PortRange" | "PrivateKey" | "RandomToken" | "Subnet" | "Location" | "TimePeriod" | "RavinUIUser";
 const FieldTypesMap = {
-  Boolean: "BooleanField",
-  Number: "NumberField",
-  String: "TextField",
-  Choices: "ChoicesField",
-  DateTime: "DateTimeField",
-  File: "FileField",
-  Label: "TextField",
-  Password: "PasswordField",
-  Binary: "text",
-  Duration: "time",
-  Hostname: "text",
-  Port: "number",
-  PortRange: "text",
-  PrivateKey: "file",
-  RandomToken: "fragment",
-  Subnet: "text",
-  Location: "text",
-  TimePeriod: "text",
-  RavinUIUser: "text",
+  Boolean: ["BooleanField", "boolean", false],
+  Number: ["NumberField", "number", 0],
+  String: ["TextField", "string", ""],
+  Choices: ["ChoicesField", "object", {}],
+  DateTime: ["DateTimeField", "object", {}],
+  File: ["FileField", "object", {}],
+  Label: ["TextField", "string", ""],
+  Password: ["PasswordField", "string", ""],
+  Binary: ["TextField", "string", ""],
+  Duration: ["time", "number", 0],
+  Hostname: ["TextField", "string", ""],
+  Port: ["NumberField", "number", 0],
+  PortRange: ["TextField", "string", ""],
+  PrivateKey: ["FileField", "object", {}],
+  RandomToken: ["fragment", "string", ""],
+  Subnet: ["TextField", "string", ""],
+  Location: ["TextField", "string", ""],
+  TimePeriod: ["TextField", "string", ""],
+  RavinUIUser: ["TextField", "string", ""],
 };
 
 export interface RawFieldProps {
   type?: keyof typeof FieldTypesMap;
-  field_key: string;
+  fieldKey: string;
   name?: string;
   description?: string;
   long_description?: string;
-  handleDataModelChange: any;
   default?: any;
-  value?: any;
+  getFormFieldValue: any;
+  setFormFieldValue: any;
+  parentPath: string[];
+  parentName?: string[];
   array?: boolean;
   order?: number;
   options?: OptionsProps;
@@ -41,11 +44,11 @@ export interface RawFieldProps {
 }
 
 export interface FieldProps {
-  field_key: string;
+  fieldKey: string;
   name: string;
-  elementAttrs: object;
   default: any;
-  value: any;
+  value?: any;
+  onChange?: any;
   options: OptionsProps;
   events: object;
 }
@@ -59,121 +62,94 @@ const SimpleField = (props: RawFieldProps) => {
   let {
     type: fieldType,
     array,
-    value: initialValue,
+    getFormFieldValue,
+    setFormFieldValue,
     order,
     description,
     long_description,
-    handleDataModelChange,
+    parentPath,
+    parentName = parentPath,
     ...otherProps
   } = props;
 
   let fieldProps: any = { ...otherProps };
 
-  const componentName = FieldTypesMap[fieldType ? fieldType : "String"];
+  const [componentName, valueType, typeDefaultValue] =
+    FieldTypesMap[fieldType ? fieldType : "String"];
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
   const showLabel = fieldProps.name !== null;
-  fieldProps.name = fieldProps.name?.toString() || fieldProps.field_key;
+  fieldProps.name = fieldProps.name?.toString() || fieldProps.fieldKey;
   if (fieldProps.default === undefined) fieldProps.default = null;
 
   if (!("options" in fieldProps)) fieldProps.options = {};
   if (!("events" in fieldProps)) fieldProps.events = {};
 
-  fieldProps.elementAttrs = {
-    "aria-label": fieldProps.name,
-  };
-
+  let help = {};
   if (description) {
+    // TODO: check trim tooltip in form items
     let title = description.toString().slice(0, 120);
     if (description.toString().length > 120) {
       title = title + " ...";
     }
-    fieldProps.elementAttrs.title = title;
+    // TODO: check adding simple title to form items
+    // help = { help: title };
   }
-  if (initialValue === undefined) {
-    initialValue = fieldProps.default;
-    if (array && !Array.isArray(initialValue)) {
-      initialValue = [];
-    }
-  }
-  const [value, setValue] = useReducer((value: any, newValue: any) => {
-    handleDataModelChange({ [fieldProps.field_key]: newValue });
-    return newValue;
-  }, initialValue);
-
-  function handleClone() {
-    const newValue = [...value, null];
-    setValue(newValue);
+  let tooltip = {};
+  if (long_description) {
+    tooltip = { tooltip: long_description };
   }
 
-  function handleRemove(index: number) {
-    let newValue = [...value];
-    newValue.splice(index, 1);
-    setValue(newValue);
+  let dataModelPath = [...parentPath, fieldProps.fieldKey];
+
+  if (getFormFieldValue(dataModelPath) === undefined) {
+    let defaultValue = fieldProps.default;
+    if (
+      (array && !Array.isArray(defaultValue)) ||
+      (!array && typeof defaultValue !== valueType)
+    )
+      defaultValue = array ? [] : typeDefaultValue;
+    setFormFieldValue(dataModelPath, defaultValue);
   }
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>, index?: number) {
-    let fieldValue =
-      event.target.type === "checkbox"
-        ? event.target.checked
-        : event.target.type === "number"
-        ? event.target.valueAsNumber
-        : event.target.value;
-    let newValue: any = fieldValue;
-    if (array) {
-      newValue = [...value];
-      newValue.splice(index, 1, fieldValue);
-    }
-    setValue(newValue);
-  }
+  let formItemName = [...parentName, fieldProps.fieldKey];
 
+  let label = showLabel ? { label: fieldProps.name } : null;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div
-        className="simple_field"
-        id={fieldProps.field_key}
-        style={order === undefined ? {} : { order }}>
-        {showLabel && (
-          <label htmlFor={fieldProps.field_key}>
-            {fieldProps.name.slice(0, 30)}
-          </label>
-        )}
-        {long_description && (
-          <span className="question_icon" title={long_description}></span>
-        )}
-
-        {array ? (
-          <div className="array_field">
-            {value.map((singleValue: any, index: number) => (
-              <div key={v4()} className="removable">
-                <FieldComponent
-                  value={singleValue}
-                  {...fieldProps}
-                  elementAttrs={{
-                    ...fieldProps.elementAttrs,
-                    onChange: (event: any) => handleChange(event, index),
-                  }}
-                />
-                <span
-                  className="remove_icon"
-                  onClick={() => handleRemove(index)}
-                  title={`remove this item of
-                   ${props.name || props.field_key}`}></span>
-              </div>
-            ))}
-            {<span className="clone_icon" onClick={handleClone}></span>}
-          </div>
-        ) : (
-          <FieldComponent
-            value={value}
-            {...fieldProps}
-            elementAttrs={{
-              ...fieldProps.elementAttrs,
-              onChange: handleChange,
-            }}
-          />
-        )}
-      </div>
+      {array ? (
+        <Form.Item {...label} {...tooltip} {...help}>
+          <Form.List name={formItemName}>
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map((field) => (
+                  <Space
+                    key={field.key}
+                    style={{ display: "flex", marginBottom: 2 }}
+                    align="baseline">
+                    <Form.Item {...field}>
+                      <FieldComponent {...fieldProps} />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(field.name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add(typeDefaultValue)}
+                    icon={<PlusOutlined />}>
+                    {`Add ${fieldProps.name}`}
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Form.Item>
+      ) : (
+        <Form.Item {...label} {...tooltip} {...help} name={formItemName}>
+          <FieldComponent {...fieldProps} />
+        </Form.Item>
+      )}
     </Suspense>
   );
 };

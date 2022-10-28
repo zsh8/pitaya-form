@@ -1,13 +1,12 @@
+import { Input } from "antd";
 import React from "react";
 import { FieldProps } from "..";
 import "./TextField.css";
 
 const TextField = (props: FieldProps) => {
-  const initialValue = props.value || "";
+  let value = props.value;
 
-  return (
-    <input type="text" defaultValue={initialValue} {...props.elementAttrs} />
-  );
+  return <Input type="text" value={value} onChange={props.onChange} />;
 };
 
 export default TextField;

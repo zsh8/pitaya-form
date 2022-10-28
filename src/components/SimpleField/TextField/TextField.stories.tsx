@@ -15,12 +15,12 @@ const Template: ComponentStory<typeof TextField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  field_key: "text_field",
+  fieldKey: "text_field",
 };
 
 export const TextFieldWithOptions = Template.bind({});
 TextFieldWithOptions.args = {
-  field_key: "first_name",
+  fieldKey: "first_name",
   name: "first name",
   description: "your first name",
   long_description: "enter your first name",

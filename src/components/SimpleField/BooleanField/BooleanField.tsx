@@ -1,18 +1,16 @@
+import { Checkbox } from "antd";
+import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import React from "react";
 import { FieldProps } from "..";
 import "./BooleanField.css";
 
 const BooleanField = (props: FieldProps) => {
-  const initialChecked = props.value || false;
+  let value = props.value;
+  const handleChange = (e: CheckboxChangeEvent) => {
+    props.onChange(e.target.checked);
+  };
 
-  return (
-    <input
-      type="checkbox"
-      value={props.field_key}
-      defaultChecked={initialChecked}
-      {...props.elementAttrs}
-    />
-  );
+  return <Checkbox checked={value} onChange={handleChange} />;
 };
 
 export default BooleanField;

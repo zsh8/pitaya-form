@@ -1,151 +1,116 @@
-import React, { useReducer } from "react";
-import { useState } from "react";
-import { v4 } from "uuid";
+import React from "react";
+import { Button, Card, Form, Space, Tooltip } from "antd";
 import "./GroupField.css";
 import { RawGroupProps } from "../Form";
 import SimpleField from "../SimpleField";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 export interface GroupProps extends RawGroupProps {
-  field_key: string;
-  children_map: any;
-  value?: any;
+  fieldKey: string;
+  childrenMap: any;
+  getFormFieldValue: any;
+  setFormFieldValue: any;
+  parentPath: string[];
+  parentName?: string[];
 }
 
 const GroupField = (props: GroupProps) => {
-  let elementAttrs: any = {
-    "aria-label": props.name?.toString() || props.field_key,
-  };
-
-  let { array, default: rawDefault, value: initialValue, order } = props;
+  let {
+    array,
+    default: rawDefault,
+    order,
+    description,
+    getFormFieldValue,
+    setFormFieldValue,
+    parentPath,
+    parentName = parentPath,
+  } = props;
 
   let groupDefault: object[] = Array.isArray(rawDefault) ? rawDefault : [];
 
-  if (initialValue === undefined) {
-    initialValue = groupDefault;
+  let title = {};
+  if (props.name || description) {
+    const tooltipTitle = description ? { title: description } : {};
+    title = {
+      title: <Tooltip {...tooltipTitle}>{props.name}</Tooltip>,
+    };
   }
+
   interface ChangeAction {
     type: "clone" | "remove" | "update";
     index?: number;
     updates?: any;
   }
-  let [value, setValue] = useReducer((value: any, action: ChangeAction) => {
-    let newValue;
-    switch (action.type) {
-      case "clone":
-        newValue = [...value, {}];
-        break;
-      case "remove":
-        newValue = [...value];
-        newValue.splice(action.index, 1);
-        break;
-      case "update":
-        if (action.index !== undefined) {
-          newValue = [...value];
-          newValue.splice(action.index, 1, {
-            ...value[action.index],
-            ...action.updates,
-          });
-        } else
-          newValue =
-            props.target_group === null
-              ? { ...action.updates }
-              : { ...value, ...action.updates };
-        break;
-      default:
-        newValue = value;
-    }
-    let dataModel = {};
-    if (props.target_group === null) dataModel = { ...newValue };
-    else dataModel = { [props.target_group || props.field_key]: newValue };
-    props.handleDataModelChange(dataModel);
-    return newValue;
-  }, initialValue);
+  let dataModelPath: any =
+    props.target_group === null
+      ? [...parentPath]
+      : props.target_group === undefined
+      ? [...parentPath, props.fieldKey]
+      : [...parentPath, props.target_group];
 
-  function makeChildren(initialValue: any, index?: number) {
+  if (
+    array &&
+    getFormFieldValue(dataModelPath) === undefined &&
+    groupDefault !== undefined
+  ) {
+    setFormFieldValue(dataModelPath, groupDefault);
+  }
+
+  let groupName =
+    props.target_group === null
+      ? [...parentName]
+      : props.target_group === undefined
+      ? [...parentName, props.fieldKey]
+      : [...parentName, props.target_group];
+
+  function makeChildren(listItemName?: any) {
     let children = [];
-    for (const [key, fieldProps] of props.children_map) {
+    for (const [key, fieldProps] of props.childrenMap) {
       let childProps = { ...fieldProps };
+      childProps.parentPath = array
+        ? [...dataModelPath, listItemName]
+        : dataModelPath;
+      childProps.parentName = array ? [listItemName] : [...groupName];
 
-      childProps.handleDataModelChange = (updates: any) =>
-        setValue({
-          ...(index === undefined ? {} : { index }),
-          type: "update",
-          updates: updates,
-        });
       let childIsSimple = key.startsWith("simple_");
-
-      if (!childIsSimple && childProps.target_group === null)
-        childProps.value = { ...initialValue };
-      else {
-        let dataModelKey = childProps.target_group || childProps.field_key;
-        if (dataModelKey in initialValue) {
-          childProps.value = initialValue[dataModelKey];
-        }
-      }
 
       if (childIsSimple) {
         children.push(
-          <SimpleField key={childProps.field_key} {...childProps} />
+          <SimpleField key={childProps.fieldKey} {...childProps} />
         );
       } else {
         children.push(
-          <GroupField key={childProps.field_key} {...childProps}></GroupField>
+          <GroupField key={childProps.fieldKey} {...childProps}></GroupField>
         );
       }
     }
+
     return children;
   }
+  return array ? (
+    <Form.List name={groupName}>
+      {(fields, { add, remove }) => (
+        <>
+          {fields.map((field) => (
+            <Space
+              key={field.key}
+              style={{ display: "flex", marginBottom: 2 }}
+              align="baseline">
+              <Card {...title}>{makeChildren(field.name)}</Card>
 
-  if (!array && !props.name && !props.description) {
-    elementAttrs.className = "without_border";
-  }
-  return (
-    <div className="group_field" style={order === undefined ? {} : { order }}>
-      {array ? (
-        <div className="array_field">
-          {value.map((singleValue: any, index: number) => (
-            <div key={v4()} className="removable">
-              <fieldset {...elementAttrs}>
-                {(props.name || props.description) && (
-                  <legend>
-                    {props.name}
-                    {props.description && (
-                      <span
-                        className="question_icon"
-                        title={props.description}></span>
-                    )}
-                  </legend>
-                )}
-                {makeChildren(singleValue, index)}
-              </fieldset>
-              <span
-                className="remove_icon"
-                onClick={() => setValue({ type: "remove", index })}
-                title={`remove this item of ${
-                  props.name || props.field_key
-                }`}></span>
-            </div>
+              <MinusCircleOutlined onClick={() => remove(field.name)} />
+            </Space>
           ))}
-          <span
-            className="clone_icon"
-            onClick={() => setValue({ type: "clone" })}></span>
-        </div>
-      ) : (
-        <fieldset {...elementAttrs}>
-          {(props.name || props.description) && (
-            <legend>
-              {props.name}
-              {props.description && (
-                <span
-                  className="question_icon"
-                  title={props.description}></span>
-              )}
-            </legend>
-          )}
-          {makeChildren(value)}
-        </fieldset>
+          <Form.Item>
+            <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
+              {`Add ${props.name || props.fieldKey}`}
+            </Button>
+          </Form.Item>
+        </>
       )}
-    </div>
+    </Form.List>
+  ) : (
+    <Card {...title}>{makeChildren()}</Card>
   );
 };
 

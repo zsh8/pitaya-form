@@ -7,7 +7,7 @@ describe("NumberField", () => {
   test("renders the NumberField component", () => {
     render(
       <NumberField
-        field_key="port"
+        fieldKey="port"
         name="port"
         description="port of source"
         long_description="enter port of source"

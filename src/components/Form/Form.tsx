@@ -1,4 +1,5 @@
-import React, { useReducer } from "react";
+import React from "react";
+import { Button, Form } from "antd";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
 import "./Form.css";
@@ -21,49 +22,35 @@ export interface RawGroupProps {
   array?: boolean;
   order?: number;
   events?: object;
-  handleDataModelChange: any;
 }
 type ActionKey = "remove" | "update" | "rpc" | "modal" | "submit";
 type ActionProps = {
   [key in ActionKey]: object;
 };
 
-const Form = (props: PitayaFormProps) => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
+  const [form] = Form.useForm();
+  const setFormFieldValue = (fieldName: any, value: any) =>
+    form.setFieldValue(fieldName, value);
+  const getFormFieldValue = (fieldName: any) => form.getFieldValue(fieldName);
+  const handleSubmit = (values: any) => {
     // Preventing the page from reloading
-    event.preventDefault();
+    console.log(values);
   };
 
   const rootGroup = "_root";
   const dataModelRoot = props.groups?.[rootGroup]?.target_group;
-  const initialDataModel =
-    props.input || (dataModelRoot ? { [dataModelRoot]: {} } : {});
-  let initialValue = dataModelRoot
-    ? initialDataModel[dataModelRoot]
-    : initialDataModel;
-
-  const [dataModel, setDataModel] = useReducer(
-    (dataModel: { [key: string]: any }, updates: { [key: string]: any }) => {
-      if (dataModelRoot)
-        return { [dataModelRoot]: { ...dataModel[dataModelRoot], ...updates } };
-      else return { ...dataModel, ...updates };
-    },
-    initialDataModel
-  );
+  const formPath = dataModelRoot ? [dataModelRoot] : [];
+  const initialDataModel = props.input || {};
 
   let fieldsMap = new Map<string, any>();
-  for (const field_key in props.form) {
-    const { gid = rootGroup, ...fieldProps } = props.form[field_key];
-    fieldProps.field_key = field_key;
-    if (gid === rootGroup)
-      fieldProps.handleDataModelChange = (updates: any) =>
-        setDataModel(updates);
-    if (
-      (gid === rootGroup || props.groups?.[gid]?.target_group === null) &&
-      field_key in initialValue
-    ) {
-      fieldProps.value = initialValue[field_key];
-    }
+  for (const fieldKey in props.form) {
+    const { gid = rootGroup, ...fieldProps } = props.form[fieldKey];
+    fieldProps.fieldKey = fieldKey;
+    fieldProps.parentPath = formPath;
+    fieldProps.setFormFieldValue = setFormFieldValue;
+    fieldProps.getFormFieldValue = getFormFieldValue;
+
     let currentGid: string = gid;
     let groupStack = [];
     while (currentGid !== rootGroup) {
@@ -71,58 +58,57 @@ const Form = (props: PitayaFormProps) => {
       currentGid = props.groups?.[currentGid]?.gid || rootGroup;
     }
     let parentChildren: Map<string, any> = fieldsMap;
-    let parentInitialValue = initialValue;
     while (groupStack.length > 0) {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
-        const { gid: groupGid = rootGroup, ...groupFieldProps } =
+        const { gid: groupGid = rootGroup, ...otherProps } =
           props.groups?.[currentGid] || {};
-        groupFieldProps.field_key = currentGid;
-        if (groupGid === rootGroup)
-          groupFieldProps.handleDataModelChange = (updates: any) =>
-            setDataModel(updates);
+        const groupFieldProps: any = { ...otherProps };
+        groupFieldProps.fieldKey = currentGid;
+        if (groupGid === rootGroup) groupFieldProps.parentPath = formPath;
 
-        if (groupFieldProps.target_group === null)
-          groupFieldProps.value = groupFieldProps.array
-            ? {}
-            : { ...parentInitialValue };
-        else {
-          const dataModelKey = groupFieldProps.target_group || currentGid;
-          if (dataModelKey in parentInitialValue) {
-            groupFieldProps.value = parentInitialValue[dataModelKey];
-          }
-        }
-        groupFieldProps.children_map = new Map<string, any>();
+        groupFieldProps.setFormFieldValue = setFormFieldValue;
+        groupFieldProps.getFormFieldValue = getFormFieldValue;
+
+        groupFieldProps.childrenMap = new Map<string, any>();
         parentChildren.set(`group_${currentGid}`, groupFieldProps);
 
-        parentChildren = groupFieldProps.children_map;
-        parentInitialValue = groupFieldProps.value || {};
+        parentChildren = groupFieldProps.childrenMap;
       } else {
-        parentChildren = parentChildren.get(`group_${currentGid}`).children_map;
+        parentChildren = parentChildren.get(`group_${currentGid}`).childrenMap;
       }
     }
-    parentChildren.set(`simple_${field_key}`, fieldProps);
+    parentChildren.set(`simple_${fieldKey}`, fieldProps);
   }
 
   let formFields = [];
   for (const [key, fieldProps] of fieldsMap) {
     if (key.startsWith("simple_")) {
       formFields.push(
-        <SimpleField key={fieldProps.field_key} {...fieldProps} />
+        <SimpleField key={fieldProps.fieldKey} {...fieldProps} />
       );
     } else {
       formFields.push(
-        <GroupField key={fieldProps.field_key} {...fieldProps}></GroupField>
+        <GroupField key={fieldProps.fieldKey} {...fieldProps}></GroupField>
       );
     }
   }
+
   return (
     <>
-      <form onSubmit={handleSubmit}>{formFields}</form>
-      <button type="submit">save</button>
-      <pre>{JSON.stringify(dataModel, undefined, 2)}</pre>
+      <Form
+        form={form}
+        initialValues={initialDataModel}
+        layout={"vertical"}
+        colon={false}
+        onFinish={handleSubmit}>
+        {formFields}
+        <Button type="primary" htmlType="submit">
+          save
+        </Button>
+      </Form>
     </>
   );
 };
 
-export default Form;
+export default App;

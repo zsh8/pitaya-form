@@ -7,7 +7,7 @@ describe("TextField", () => {
   test("renders the TextField component", () => {
     render(
       <TextField
-        field_key="verify_ssl"
+        fieldKey="verify_ssl"
         name="verify ssl"
         description="verifies ssl"
         long_description="check to verify ssl"

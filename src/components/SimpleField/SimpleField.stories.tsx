@@ -17,19 +17,19 @@ const Template: ComponentStory<typeof SimpleField> = (args) => (
 // Default type
 export const Primary = Template.bind({});
 Primary.args = {
-  field_key: "default_field",
+  fieldKey: "default_field",
 };
 
 // Boolean
 export const PrimaryBooleanField = Template.bind({});
 PrimaryBooleanField.args = {
-  field_key: "boolean_field",
+  fieldKey: "boolean_field",
   type: "Boolean",
 };
 
 export const BooleanFieldWithOptions = Template.bind({});
 BooleanFieldWithOptions.args = {
-  field_key: "verify_ssl",
+  fieldKey: "verify_ssl",
   name: "verify ssl",
   description: "check for verify ssl",
   long_description: "if checked verifies ssl",
@@ -42,13 +42,13 @@ BooleanFieldWithOptions.args = {
 // Number
 export const PrimaryNmberField = Template.bind({});
 PrimaryNmberField.args = {
-  field_key: "number_field",
+  fieldKey: "number_field",
   type: "Number",
 };
 
 export const NumberFieldWithOptions = Template.bind({});
 NumberFieldWithOptions.args = {
-  field_key: "port",
+  fieldKey: "port",
   name: "port",
   description: "port of server",
   long_description: "if server has port",
@@ -61,13 +61,13 @@ NumberFieldWithOptions.args = {
 // String
 export const PrimaryStringField = Template.bind({});
 PrimaryStringField.args = {
-  field_key: "string_field",
+  fieldKey: "string_field",
   type: "String",
 };
 
 export const StringFieldWithOptions = Template.bind({});
 StringFieldWithOptions.args = {
-  field_key: "host",
+  fieldKey: "host",
   name: "host",
   description: "host name of server",
   long_description: "this is the host name of the server",
@@ -80,14 +80,14 @@ StringFieldWithOptions.args = {
 // Choices
 export const ChoicesField = Template.bind({});
 ChoicesField.args = {
-    field_key: "choices_field",
+    fieldKey: "choices_field",
     type: "Choices",
          
 };
 
 export const ChoicesFieldWithOptions = Template.bind({});
 ChoicesField.args = {
-    field_key: "country",
+    fieldKey: "country",
         name: "Countries",
     description: "list of countries",
     long_description: "this is the list of countries",    
@@ -103,14 +103,14 @@ ChoicesField.args = {
 // DateTime
 export const DateTimeField = Template.bind({});
 DateTimeField.args = {
-    field_key: "dateTime_field",
+    fieldKey: "dateTime_field",
     type: "DateTime",
          
 };
 
 export const DateTimeFieldWithOptions = Template.bind({});
 DateTimeField.args = {
-    field_key: "register_time",
+    fieldKey: "register_time",
         name: "register time",
     description: "time of register",
     long_description: "time that register occurred",    

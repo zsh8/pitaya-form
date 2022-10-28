@@ -6,7 +6,7 @@ import SimpleField from "./SimpleField";
 describe("SimpleField", () => {
   test("renders the SimpleField component", () => {
     render(
-      <SimpleField field_key="verify_ssl" name="verify ssl" type="Boolean" />
+      <SimpleField fieldKey="verify_ssl" name="verify ssl" type="Boolean" />
     );
   });
 });
