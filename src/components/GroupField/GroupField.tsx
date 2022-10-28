@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Form, Space, Tooltip } from "antd";
+import { Button, Card, Col, Form, Row, Space, Tooltip } from "antd";
 import "./GroupField.css";
 import { RawGroupProps } from "../Form";
 import SimpleField from "../SimpleField";
@@ -85,7 +85,11 @@ const GroupField = (props: GroupProps) => {
       }
     }
 
-    return children;
+    return children.map((child, index) => (
+      <Col key={index} order={Number(child.props.order) || 0}>
+        {child}
+      </Col>
+    ));
   }
   return array ? (
     <Form.List name={groupName}>
@@ -95,8 +99,10 @@ const GroupField = (props: GroupProps) => {
             <Space
               key={field.key}
               style={{ display: "flex", marginBottom: 2 }}
-              align="baseline">
-              <Card {...title}>{makeChildren(field.name)}</Card>
+              align="start">
+              <Card {...title}>
+                <Row gutter={[16, 8]}>{makeChildren(field.name)}</Row>
+              </Card>
 
               <MinusCircleOutlined onClick={() => remove(field.name)} />
             </Space>

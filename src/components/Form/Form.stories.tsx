@@ -20,12 +20,12 @@ HelloWorld.args = {
     device_name: {
       name: "Device Name direct child of form",
       type: "Boolean",
-      order: 0,
+      order: 5,
     },
     text_field: {
       name: "text direct child of form",
       default: "default value of text field",
-      order: 0,
+      order: -1,
     },
 
     port: {
@@ -37,6 +37,7 @@ HelloWorld.args = {
       gid: "header",
       options: {},
       events: {},
+      order: 1,
     },
     host: {
       name: "array host",
@@ -44,7 +45,6 @@ HelloWorld.args = {
       long_description: "this is the host name of the server",
       type: "String",
       default: ["server 1"],
-      order: 3,
       array: true,
       options: { validators: [{ regex: ".+" }] },
       events: {},
@@ -58,7 +58,6 @@ HelloWorld.args = {
       default: [true, false],
       array: true,
       gid: "header",
-      order: 1,
       options: {},
       events: {},
     },
@@ -71,6 +70,7 @@ HelloWorld.args = {
       default: [1, 5],
       options: { signed: true, float: true },
       events: {},
+      order: 4,
     },
     single_number: {
       name: "single number child of array_group and single",
@@ -91,6 +91,7 @@ HelloWorld.args = {
       default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
       array: false,
       gid: "parent_group",
+      order: -1,
       options: {},
       events: {},
     },
@@ -118,6 +119,7 @@ HelloWorld.args = {
       name: "array group",
       array: true,
       default: [{ single_number: 66 }],
+      order: 4,
     },
     _root: { target_group: "main" },
   },

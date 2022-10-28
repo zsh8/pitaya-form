@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form } from "antd";
+import { Button, Col, Form, Row } from "antd";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
 import "./Form.css";
@@ -102,7 +102,16 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         layout={"vertical"}
         colon={false}
         onFinish={handleSubmit}>
-        {formFields}
+        <Row>
+          {formFields.map((formField, index) => (
+            <Col
+              key={index}
+              order={Number(formField.props.order) || 0}
+              span={24}>
+              {formField}
+            </Col>
+          ))}
+        </Row>
         <Button type="primary" htmlType="submit">
           save
         </Button>
