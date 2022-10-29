@@ -9,8 +9,6 @@ describe("TextField", () => {
       <TextField
         fieldKey="verify_ssl"
         name="verify ssl"
-        description="verifies ssl"
-        long_description="check to verify ssl"
         default=""
         options={{}}
         events={{}}

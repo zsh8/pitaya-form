@@ -22,8 +22,6 @@ export const TextFieldWithOptions = Template.bind({});
 TextFieldWithOptions.args = {
   fieldKey: "first_name",
   name: "first name",
-  description: "your first name",
-  long_description: "enter your first name",
   default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
   options: {},
   events: {},

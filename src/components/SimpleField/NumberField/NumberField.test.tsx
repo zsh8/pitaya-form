@@ -9,8 +9,6 @@ describe("NumberField", () => {
       <NumberField
         fieldKey="port"
         name="port"
-        description="port of source"
-        long_description="enter port of source"
         default={0}
         options={{}}
         events={{}}

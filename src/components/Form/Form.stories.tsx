@@ -21,6 +21,7 @@ HelloWorld.args = {
       name: "Device Name direct child of form",
       type: "Boolean",
       order: 5,
+      default: null,
     },
     text_field: {
       name: "text direct child of form",
@@ -33,7 +34,7 @@ HelloWorld.args = {
       description: "port of server",
       long_description: "if server has port",
       type: "Number",
-      default: 8080,
+      default: null,
       gid: "header",
       options: {},
       events: {},
@@ -107,7 +108,7 @@ HelloWorld.args = {
       gid: "parent_group",
       description: "headers of this form",
       array: true,
-      default: [{ port: 587, verify_ssl: [false, false, true, false] }, {}],
+      default: [{ port: 587, verify_ssl: [null, false, true, false] }, {}],
     },
     parent_group: {
       description: "parent with description without name",
@@ -129,7 +130,6 @@ HelloWorld.args = {
       "last parent": { parent_group: [{ first_name: "input name value" }] },
       null_group: { single_field: "input value inside group" },
       array_group: [{ single_number: 9999 }, { single_number: 2222 }],
-      number_test: [46, 77],
       single_field: "input value with null target group",
     },
   },

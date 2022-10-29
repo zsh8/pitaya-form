@@ -9,8 +9,6 @@ describe("BooleanField", () => {
       <BooleanField
         fieldKey="verify_ssl"
         name="verify ssl"
-        description="verifies ssl"
-        long_description="check to verify ssl"
         default={false}
         options={{}}
         events={{}}

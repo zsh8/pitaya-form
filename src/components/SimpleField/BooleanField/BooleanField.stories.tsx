@@ -22,8 +22,6 @@ export const BooleanFieldWithOptions = Template.bind({});
 BooleanFieldWithOptions.args = {
   fieldKey: "verify_ssl",
   name: "verify ssl",
-  description: "check for verify ssl",
-  long_description: "if checked verifies ssl",
   default: false,
   options: {},
   events: {},

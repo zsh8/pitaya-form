@@ -25,8 +25,6 @@ export const NumberFieldWithOptions = Template.bind({});
 NumberFieldWithOptions.args = {
   fieldKey: "port",
   name: "port",
-  description: "port of source",
-  long_description: "enter the port of source",
   default: 12,
   options: { signed: true, float: true },
   events: {},

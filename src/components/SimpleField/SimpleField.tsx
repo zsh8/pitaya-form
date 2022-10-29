@@ -3,27 +3,29 @@ import { Form, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import "./SimpleField.css";
 
-//type FieldType = "Boolean" | "Number" | "String" | "Choices" | "DateTime" | "File" | "Label" | "Password" | "Binary" | "Duration" | "Hostname" | "Port" | "PortRange" | "PrivateKey" | "RandomToken" | "Subnet" | "Location" | "TimePeriod" | "RavinUIUser";
+// keys are the PitayaForm fields type and each value is a triple
+// containing the custom component name, value type in data model
+// and default value for each type
 const FieldTypesMap = {
   Boolean: ["BooleanField", "boolean", false],
   Number: ["NumberField", "number", 0],
   String: ["TextField", "string", ""],
-  Choices: ["ChoicesField", "object", {}],
-  DateTime: ["DateTimeField", "object", {}],
-  File: ["FileField", "object", {}],
-  Label: ["TextField", "string", ""],
-  Password: ["PasswordField", "string", ""],
-  Binary: ["TextField", "string", ""],
-  Duration: ["time", "number", 0],
-  Hostname: ["TextField", "string", ""],
-  Port: ["NumberField", "number", 0],
-  PortRange: ["TextField", "string", ""],
-  PrivateKey: ["FileField", "object", {}],
-  RandomToken: ["fragment", "string", ""],
-  Subnet: ["TextField", "string", ""],
-  Location: ["TextField", "string", ""],
-  TimePeriod: ["TextField", "string", ""],
-  RavinUIUser: ["TextField", "string", ""],
+  Choices: ["ChoicesField", "object", null],
+  DateTime: ["DateTimeField", "object", null],
+  File: ["FileField", "object", null],
+  Label: ["TextField", "string", null],
+  Password: ["PasswordField", "string", null],
+  Binary: ["TextField", "string", null],
+  Duration: ["time", "number", null],
+  Hostname: ["TextField", "string", null],
+  Port: ["NumberField", "number", null],
+  PortRange: ["TextField", "string", null],
+  PrivateKey: ["FileField", "object", null],
+  RandomToken: ["fragment", "string", null],
+  Subnet: ["TextField", "string", null],
+  Location: ["TextField", "string", null],
+  TimePeriod: ["TextField", "string", null],
+  RavinUIUser: ["TextField", "string", null],
 };
 
 export interface RawFieldProps {
@@ -33,10 +35,7 @@ export interface RawFieldProps {
   description?: string;
   long_description?: string;
   default?: any;
-  getFormFieldValue: any;
-  setFormFieldValue: any;
   parentPath: string[];
-  parentName?: string[];
   array?: boolean;
   order?: number;
   options?: OptionsProps;
@@ -58,30 +57,34 @@ interface OptionsProps {
   validators?: object[];
 }
 
-const SimpleField = (props: RawFieldProps) => {
+/**
+ * Renders a form field of any type with the given properties
+ * @param  props raw attributes needed to build a form field
+ * @returns a From.Item component
+ */
+const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   let {
     type: fieldType,
     array,
-    getFormFieldValue,
-    setFormFieldValue,
     order,
     description,
     long_description,
     parentPath,
-    parentName = parentPath,
     ...otherProps
   } = props;
 
   let fieldProps: any = { ...otherProps };
 
   const [componentName, valueType, typeDefaultValue] =
-    FieldTypesMap[fieldType ? fieldType : "String"];
+    FieldTypesMap[fieldType ? fieldType : "String"]; // default field type is String
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
+  // fields with null name should hava no label in the form
   const showLabel = fieldProps.name !== null;
   fieldProps.name = fieldProps.name?.toString() || fieldProps.fieldKey;
-  if (fieldProps.default === undefined) fieldProps.default = null;
+  let label = showLabel ? { label: fieldProps.name } : null;
 
+  // set default values for options and events
   if (!("options" in fieldProps)) fieldProps.options = {};
   if (!("events" in fieldProps)) fieldProps.events = {};
 
@@ -95,31 +98,25 @@ const SimpleField = (props: RawFieldProps) => {
     // TODO: check adding simple title to form items
     // help = { help: title };
   }
-  let tooltip = {};
+  let tooltip;
   if (long_description) {
     tooltip = { tooltip: long_description };
   }
 
-  let dataModelPath = [...parentPath, fieldProps.fieldKey];
+  // set default value for the field based on the type
+  // when default is not defined in properties
+  if (fieldProps.default === undefined)
+    fieldProps.default = array ? [] : typeDefaultValue;
 
-  if (getFormFieldValue(dataModelPath) === undefined) {
-    let defaultValue = fieldProps.default;
-    if (
-      (array && !Array.isArray(defaultValue)) ||
-      (!array && typeof defaultValue !== valueType)
-    )
-      defaultValue = array ? [] : typeDefaultValue;
-    setFormFieldValue(dataModelPath, defaultValue);
-  }
+  // used as name property of Form.Item or Form.List components for initializing
+  // value from form initialValue and setting value after calling onChange
+  let fieldPath = [...parentPath, fieldProps.fieldKey];
 
-  let formItemName = [...parentName, fieldProps.fieldKey];
-
-  let label = showLabel ? { label: fieldProps.name } : null;
   return (
     <Suspense fallback={<div>Loading...</div>}>
       {array ? (
         <Form.Item {...label} {...tooltip} {...help}>
-          <Form.List name={formItemName}>
+          <Form.List name={fieldPath} initialValue={fieldProps.default}>
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field) => (
@@ -146,7 +143,12 @@ const SimpleField = (props: RawFieldProps) => {
           </Form.List>
         </Form.Item>
       ) : (
-        <Form.Item {...label} {...tooltip} {...help} name={formItemName}>
+        <Form.Item
+          name={fieldPath}
+          initialValue={fieldProps.default}
+          {...label}
+          {...tooltip}
+          {...help}>
           <FieldComponent {...fieldProps} />
         </Form.Item>
       )}

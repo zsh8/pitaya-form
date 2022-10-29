@@ -14,10 +14,15 @@ const Template: ComponentStory<typeof SimpleField> = (args) => (
   <SimpleField {...args} />
 );
 
+const commonArgs = {
+  parentPath: ["main"],
+};
+
 // Default type
 export const Primary = Template.bind({});
 Primary.args = {
   fieldKey: "default_field",
+  ...commonArgs,
 };
 
 // Boolean
@@ -25,6 +30,7 @@ export const PrimaryBooleanField = Template.bind({});
 PrimaryBooleanField.args = {
   fieldKey: "boolean_field",
   type: "Boolean",
+  ...commonArgs,
 };
 
 export const BooleanFieldWithOptions = Template.bind({});
@@ -37,6 +43,7 @@ BooleanFieldWithOptions.args = {
   default: true,
   options: {},
   events: {},
+  ...commonArgs,
 };
 
 // Number
@@ -44,6 +51,7 @@ export const PrimaryNmberField = Template.bind({});
 PrimaryNmberField.args = {
   fieldKey: "number_field",
   type: "Number",
+  ...commonArgs,
 };
 
 export const NumberFieldWithOptions = Template.bind({});
@@ -56,6 +64,7 @@ NumberFieldWithOptions.args = {
   default: 8080,
   options: {},
   events: {},
+  ...commonArgs,
 };
 
 // String
@@ -63,6 +72,7 @@ export const PrimaryStringField = Template.bind({});
 PrimaryStringField.args = {
   fieldKey: "string_field",
   type: "String",
+  ...commonArgs,
 };
 
 export const StringFieldWithOptions = Template.bind({});
@@ -75,6 +85,7 @@ StringFieldWithOptions.args = {
   default: "server 1",
   options: { validators: [{ regex: ".+" }] },
   events: {},
+  ...commonArgs,
 };
 /*
 // Choices
@@ -82,11 +93,12 @@ export const ChoicesField = Template.bind({});
 ChoicesField.args = {
     fieldKey: "choices_field",
     type: "Choices",
-         
+    ...commonArgs
 };
 
 export const ChoicesFieldWithOptions = Template.bind({});
 ChoicesField.args = {
+    ...commonArgs,
     fieldKey: "country",
         name: "Countries",
     description: "list of countries",
@@ -105,7 +117,7 @@ export const DateTimeField = Template.bind({});
 DateTimeField.args = {
     fieldKey: "dateTime_field",
     type: "DateTime",
-         
+    ...commonArgs
 };
 
 export const DateTimeFieldWithOptions = Template.bind({});
@@ -117,6 +129,7 @@ DateTimeField.args = {
     type: "DateTime",
     default: 0,
     options: {},
-    events: {}
+    events: {},
+    ...commonArgs
 };
 */

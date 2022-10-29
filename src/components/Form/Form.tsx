@@ -5,11 +5,36 @@ import SimpleField from "../SimpleField";
 import "./Form.css";
 
 export interface PitayaFormProps {
+  /**
+   * Version of PitayaForm specification
+   */
   version: string;
+  /**
+   * An object which defines the fields of the PitayaForm
+   * each key of this object corresponds to one field
+   */
   form: { [key: string]: any };
+  /**
+   * Optional object in which keys are references to
+   * fields and groups and values are objects that
+   * add styles to the reference
+   */
   styles?: object;
+  /**
+   * An object that each key defines a logical group
+   * for changing the appearance of fields that share
+   * a group key in thier gid attribute
+   */
   groups?: { [key: string]: RawGroupProps };
+  /**
+   * An object containing actions that cab be used
+   * as fields or groups events
+   */
   actions?: { [key: string]: ActionProps[] };
+  /**
+   * Target data model according to the current
+   * entered values by the user
+   */
   input?: { [key: string]: any };
 }
 
@@ -28,11 +53,14 @@ type ActionProps = {
   [key in ActionKey]: object;
 };
 
+/**
+ * Renders a PitayaForm with specification defined by properties
+ * @param props specification of form
+ * @returns an antd Form component
+ */
 const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const [form] = Form.useForm();
-  const setFormFieldValue = (fieldName: any, value: any) =>
-    form.setFieldValue(fieldName, value);
-  const getFormFieldValue = (fieldName: any) => form.getFieldValue(fieldName);
+
   const handleSubmit = (values: any) => {
     // Preventing the page from reloading
     console.log(values);
@@ -43,52 +71,55 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const formPath = dataModelRoot ? [dataModelRoot] : [];
   const initialDataModel = props.input || {};
 
-  let fieldsMap = new Map<string, any>();
+  let formChildrenMap = new Map<string, any>();
   for (const fieldKey in props.form) {
     const { gid = rootGroup, ...fieldProps } = props.form[fieldKey];
     fieldProps.fieldKey = fieldKey;
     fieldProps.parentPath = formPath;
-    fieldProps.setFormFieldValue = setFormFieldValue;
-    fieldProps.getFormFieldValue = getFormFieldValue;
 
     let currentGid: string = gid;
     let groupStack = [];
+    // add all parent groups of the field to the groupStack
     while (currentGid !== rootGroup) {
       groupStack.push(currentGid);
       currentGid = props.groups?.[currentGid]?.gid || rootGroup;
     }
-    let parentChildren: Map<string, any> = fieldsMap;
+    // set the form children as the default parent children of the current field
+    let parentChildren: Map<string, any> = formChildrenMap;
     while (groupStack.length > 0) {
       currentGid = groupStack.pop() || "";
       if (!parentChildren.has(`group_${currentGid}`)) {
+        // create the new group properties by groups specification
         const { gid: groupGid = rootGroup, ...otherProps } =
           props.groups?.[currentGid] || {};
-        const groupFieldProps: any = { ...otherProps };
-        groupFieldProps.fieldKey = currentGid;
-        if (groupGid === rootGroup) groupFieldProps.parentPath = formPath;
+        const groupProps: any = { ...otherProps };
+        groupProps.fieldKey = currentGid;
+        if (groupGid === rootGroup) groupProps.parentPath = formPath;
 
-        groupFieldProps.setFormFieldValue = setFormFieldValue;
-        groupFieldProps.getFormFieldValue = getFormFieldValue;
-
-        groupFieldProps.childrenMap = new Map<string, any>();
-        parentChildren.set(`group_${currentGid}`, groupFieldProps);
-
-        parentChildren = groupFieldProps.childrenMap;
+        groupProps.childrenMap = new Map<string, any>();
+        // add the new group properties to the parent children
+        parentChildren.set(`group_${currentGid}`, groupProps);
+        // set the new group children as the parent children of the current field
+        parentChildren = groupProps.childrenMap;
       } else {
+        // set the existent group children as the parent children of the current field
         parentChildren = parentChildren.get(`group_${currentGid}`).childrenMap;
       }
     }
+    // add the current field properties as a child to the parent children
     parentChildren.set(`simple_${fieldKey}`, fieldProps);
   }
 
-  let formFields = [];
-  for (const [key, fieldProps] of fieldsMap) {
+  let formChildren = [];
+  // make the form fields or groups from the form children map based
+  // on the distinctive keys of the children map
+  for (const [key, fieldProps] of formChildrenMap) {
     if (key.startsWith("simple_")) {
-      formFields.push(
+      formChildren.push(
         <SimpleField key={fieldProps.fieldKey} {...fieldProps} />
       );
     } else {
-      formFields.push(
+      formChildren.push(
         <GroupField key={fieldProps.fieldKey} {...fieldProps}></GroupField>
       );
     }
@@ -103,12 +134,12 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         colon={false}
         onFinish={handleSubmit}>
         <Row>
-          {formFields.map((formField, index) => (
+          {formChildren.map((formChild, index) => (
             <Col
               key={index}
-              order={Number(formField.props.order) || 0}
+              order={Number(formChild.props.order) || 0}
               span={24}>
-              {formField}
+              {formChild}
             </Col>
           ))}
         </Row>
