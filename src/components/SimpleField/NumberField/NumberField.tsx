@@ -7,8 +7,6 @@ const NumberField = (props: FieldProps) => {
   const options: {
     step?: number;
     min?: number;
-    max?: number;
-    title?: string;
   } = {};
 
   if (props.options.float) {
@@ -19,12 +17,15 @@ const NumberField = (props: FieldProps) => {
   }
 
   let value = props.value;
-  if (value == 0) {
-    if (options.min && options.min > 0) value = options.min;
-    if (value == 0 && options.max && options.max < 0) value = options.max;
-  }
 
-  return <InputNumber value={value} onChange={props.onChange} {...options} />;
+  return (
+    <InputNumber
+      value={value}
+      onChange={props.onChange}
+      onBlur={props.onBlur}
+      {...options}
+    />
+  );
 };
 
 export default NumberField;

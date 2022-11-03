@@ -3,6 +3,7 @@ import { Button, Col, Form, Row } from "antd";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
 import "./Form.css";
+import { defaultValidateMessages } from "../../utils/validation";
 
 export interface PitayaFormProps {
   /**
@@ -132,6 +133,7 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         initialValues={initialDataModel}
         layout={"vertical"}
         colon={false}
+        validateMessages={defaultValidateMessages}
         onFinish={handleSubmit}>
         <Row>
           {formChildren.map((formChild, index) => (

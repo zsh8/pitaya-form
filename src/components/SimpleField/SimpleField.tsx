@@ -1,11 +1,12 @@
 import React, { lazy, Suspense } from "react";
 import { Form, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { convertValidatorsToRules, Validator } from "../../utils/validation";
 import "./SimpleField.css";
 
 // keys are the PitayaForm fields type and each value is a triple
-// containing the custom component name, value type in data model
-// and default value for each type
+// containing the custom component name, value type for validation
+// purposes and default value for each type
 const FieldTypesMap = {
   Boolean: ["BooleanField", "boolean", false],
   Number: ["NumberField", "number", 0],
@@ -46,15 +47,16 @@ export interface FieldProps {
   fieldKey: string;
   name: string;
   default: any;
-  value?: any;
-  onChange?: any;
+  value: any;
+  onChange: any;
+  onBlur: any;
   options: OptionsProps;
   events: object;
 }
 
 interface OptionsProps {
   [key: string]: any;
-  validators?: object[];
+  validators?: Validator[];
 }
 
 /**
@@ -69,6 +71,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     order,
     description,
     long_description,
+    options = {},
     parentPath,
     ...otherProps
   } = props;
@@ -84,9 +87,15 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   fieldProps.name = fieldProps.name?.toString() || fieldProps.fieldKey;
   let label = showLabel ? { label: fieldProps.name } : null;
 
-  // set default values for options and events
-  if (!("options" in fieldProps)) fieldProps.options = {};
+  // set default value for events
   if (!("events" in fieldProps)) fieldProps.events = {};
+  const { validators = [], ...restOptions } = options;
+  fieldProps.options = restOptions;
+
+  const validateLabel = fieldProps.name;
+  const rules = {
+    rules: convertValidatorsToRules(validators, valueType, validateLabel),
+  };
 
   let help = {};
   if (description) {
@@ -124,7 +133,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
                     key={field.key}
                     style={{ display: "flex", marginBottom: 2 }}
                     align="baseline">
-                    <Form.Item {...field}>
+                    <Form.Item {...field} {...rules} validateTrigger="onBlur">
                       <FieldComponent {...fieldProps} />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(field.name)} />
@@ -148,7 +157,9 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
           initialValue={fieldProps.default}
           {...label}
           {...tooltip}
-          {...help}>
+          {...help}
+          {...rules}
+          validateTrigger="onBlur">
           <FieldComponent {...fieldProps} />
         </Form.Item>
       )}

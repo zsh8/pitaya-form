@@ -8,6 +8,7 @@ const BooleanField = (props: FieldProps) => {
   let value = props.value;
   const handleChange = (e: CheckboxChangeEvent) => {
     props.onChange(e.target.checked);
+    props.onBlur(e.target.checked);
   };
 
   return <Checkbox checked={value} onChange={handleChange} />;

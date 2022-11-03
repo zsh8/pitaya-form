@@ -6,7 +6,14 @@ import "./TextField.css";
 const TextField = (props: FieldProps) => {
   let value = props.value;
 
-  return <Input type="text" value={value} onChange={props.onChange} />;
+  return (
+    <Input
+      type="text"
+      value={value}
+      onChange={props.onChange}
+      onBlur={props.onBlur}
+    />
+  );
 };
 
 export default TextField;

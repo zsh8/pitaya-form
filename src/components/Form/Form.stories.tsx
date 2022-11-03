@@ -22,11 +22,15 @@ HelloWorld.args = {
       type: "Boolean",
       order: 5,
       default: null,
+      options: { validators: [{ allow_null: false }] },
     },
     text_field: {
       name: "text direct child of form",
-      default: "default value of text field",
+      default: null,
       order: -1,
+      options: {
+        validators: [{ hostname: true }],
+      },
     },
 
     port: {
@@ -36,7 +40,7 @@ HelloWorld.args = {
       type: "Number",
       default: null,
       gid: "header",
-      options: {},
+      options: { validators: [{ min: 600 }] },
       events: {},
       order: 1,
     },
@@ -68,8 +72,8 @@ HelloWorld.args = {
       long_description: "enter the test number value",
       type: "Number",
       array: true,
-      default: [1, 5],
-      options: { signed: true, float: true },
+      default: [-1, 5],
+      options: { signed: false, float: true, validators: [{ min: 12 }] },
       events: {},
       order: 4,
     },
@@ -85,15 +89,16 @@ HelloWorld.args = {
     },
 
     first_name: {
-      name: "first name is more than 30 characters in length child of parent group",
+      name: null,
       description: "your first name is more than 120 ",
       long_description:
         "a very long description that should be shown anyway without trimming and it is the first name of the parent group that should be beside the headers group list. it has a farsi default value, but if input value is shown it has input value too",
       default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
       array: false,
       gid: "parent_group",
+      // TODO: negative order inside group does not work
       order: -1,
-      options: {},
+      options: { validators: [{ max: 5 }, { allow_whitespace: false }] },
       events: {},
     },
     single_field: {
