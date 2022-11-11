@@ -146,6 +146,14 @@ HelloWorld.args = {
       events: {},
       order: 1,
     },
+    time_field: {
+      name: "date time",
+      type: "DateTime",
+      default: 1647249721,
+      options: {
+        precision: "milliseconds",
+      },
+    },
   },
   styles: {},
   groups: {

@@ -1,4 +1,4 @@
-const typeTemplate = "'${msgLabel}' is not a valid ${type}";
+const typeTemplate = "'${msgLabel}' has not a valid value";
 
 export const defaultValidateMessages = {
   default: "Validation error on field '${msgLabel}'",

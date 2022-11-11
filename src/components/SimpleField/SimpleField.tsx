@@ -12,7 +12,7 @@ const FieldTypesMap = {
   Number: ["NumberField", "number", 0],
   String: ["TextField", "string", ""],
   Choices: ["ChoicesField", "string", null],
-  DateTime: ["DateTimeField", "object", null],
+  DateTime: ["DateTimeField", "number", 0],
   File: ["FileField", "object", null],
   Label: ["TextField", "string", null],
   Password: ["PasswordField", "string", null],
