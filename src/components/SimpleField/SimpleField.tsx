@@ -11,7 +11,7 @@ const FieldTypesMap = {
   Boolean: ["BooleanField", "boolean", false],
   Number: ["NumberField", "number", 0],
   String: ["TextField", "string", ""],
-  Choices: ["ChoicesField", "object", null],
+  Choices: ["ChoicesField", "string", null],
   DateTime: ["DateTimeField", "object", null],
   File: ["FileField", "object", null],
   Label: ["TextField", "string", null],
@@ -78,8 +78,11 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
 
   let fieldProps: any = { ...otherProps };
 
-  const [componentName, valueType, typeDefaultValue] =
+  let [componentName, valueType, typeDefaultValue] =
     FieldTypesMap[fieldType ? fieldType : "String"]; // default field type is String
+
+  if (componentName === "ChoicesField")
+    valueType = options.multiple ? "array" : "string";
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
   // fields with null name should hava no label in the form

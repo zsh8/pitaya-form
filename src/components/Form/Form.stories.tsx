@@ -105,6 +105,47 @@ HelloWorld.args = {
       default: "default value child of test group and single",
       gid: "null_group",
     },
+    protocol: {
+      name: "protocol",
+      description: "protocol of server",
+      long_description: "if server has protocol",
+      type: "Choices",
+      default: ["tcp"],
+      gid: "header",
+      options: {
+        choices: {
+          ip: {
+            name: "Internet Protocol",
+            description: "version 4",
+            choices: {
+              tcp: {
+                name: "Transmission Control",
+                description: "control transmission",
+                choices: {
+                  http: {
+                    name: "Hypertext Transfer",
+                    description: "http description",
+                  },
+                  dns: {
+                    name: "Domain Name System",
+                    description: "dns description",
+                  },
+                },
+              },
+              udp: { name: "User Datagram" },
+            },
+          },
+          icmp: {
+            name: "Internet Control Message Protocol",
+            description: "icmp description",
+          },
+        },
+        selectable_parents: true,
+        multiple: true,
+      },
+      events: {},
+      order: 1,
+    },
   },
   styles: {},
   groups: {
