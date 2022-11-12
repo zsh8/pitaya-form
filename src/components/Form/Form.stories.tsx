@@ -154,6 +154,23 @@ HelloWorld.args = {
         precision: "milliseconds",
       },
     },
+    file_field: {
+      name: "attachments",
+      type: "File",
+      array: true,
+      order: 0,
+      options: { multiple: true, validators: [{ min: 2 }] },
+      gid: "header",
+      default: [
+        [
+          {
+            filename: "eeee",
+            "content-url":
+              "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+          },
+        ],
+      ],
+    },
   },
   styles: {},
   groups: {

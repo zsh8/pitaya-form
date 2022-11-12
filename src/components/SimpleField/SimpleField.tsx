@@ -81,8 +81,10 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   let [componentName, valueType, typeDefaultValue] =
     FieldTypesMap[fieldType ? fieldType : "String"]; // default field type is String
 
-  if (componentName === "ChoicesField")
-    valueType = options.multiple ? "array" : "string";
+  if ((fieldType === "Choices" || fieldType === "File") && options.multiple) {
+    valueType = "array";
+    typeDefaultValue = [];
+  }
 
   const FieldComponent = lazy(() => import(`./${componentName}`));
   // fields with null name should hava no label in the form
