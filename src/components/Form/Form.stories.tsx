@@ -179,6 +179,14 @@ HelloWorld.args = {
       options: {},
       gid: "parent_group",
     },
+    password_field: {
+      name: "password",
+      type: "Password",
+      order: 0,
+      options: {},
+      default: "abced",
+      gid: "header",
+    },
   },
   styles: {},
   groups: {
