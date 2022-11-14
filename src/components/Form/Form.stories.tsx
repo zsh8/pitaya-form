@@ -171,6 +171,14 @@ HelloWorld.args = {
         ],
       ],
     },
+    test_label: {
+      name: "just label",
+      type: "Label",
+      array: true,
+      order: 0,
+      options: {},
+      gid: "parent_group",
+    },
   },
   styles: {},
   groups: {

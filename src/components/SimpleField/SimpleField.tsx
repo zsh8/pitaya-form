@@ -14,7 +14,7 @@ const FieldTypesMap = {
   Choices: ["ChoicesField", "string", null],
   DateTime: ["DateTimeField", "number", 0],
   File: ["FileField", "object", null],
-  Label: ["TextField", "string", null],
+  Label: ["LabelField", "string", null],
   Password: ["PasswordField", "string", null],
   Binary: ["TextField", "string", null],
   Duration: ["time", "number", null],
@@ -86,7 +86,12 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     typeDefaultValue = [];
   }
 
+  if (fieldType === "Label")
+    // Label field could not be an array
+    array = false;
+
   const FieldComponent = lazy(() => import(`./${componentName}`));
+
   // fields with null name should hava no label in the form
   const showLabel = fieldProps.name !== null;
   fieldProps.name = fieldProps.name?.toString() || fieldProps.fieldKey;
