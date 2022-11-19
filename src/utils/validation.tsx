@@ -60,6 +60,7 @@ export interface Validator {
   url?: boolean;
   url_schemes?: string[];
   regex?: string | RegExp;
+  binary?: boolean;
   hint?: string;
 }
 
@@ -180,6 +181,23 @@ export function convertValidatorsToRules(
         for (const section of sections) {
           if (!section.match(sectionRx))
             return Promise.reject(new Error(message));
+        }
+        return Promise.resolve();
+      };
+    }
+
+    if (validator["binary"]) {
+      customValidator = (_: any, value: any) => {
+        const message = "'${msgLabel}' is not a valid binary string";
+
+        if (typeof value !== "string") {
+          return Promise.reject(new Error(message));
+        }
+
+        try {
+          window.atob(value);
+        } catch (err) {
+          return Promise.reject(new Error(message));
         }
         return Promise.resolve();
       };

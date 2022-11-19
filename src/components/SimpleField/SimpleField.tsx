@@ -102,6 +102,10 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   const { validators = [], ...restOptions } = options;
   fieldProps.options = restOptions;
 
+  if (fieldType === "Binary") {
+    validators.push({ binary: true });
+  }
+
   const validateLabel = fieldProps.name;
   const rules = {
     rules: convertValidatorsToRules(validators, valueType, validateLabel),

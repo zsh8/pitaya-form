@@ -187,6 +187,12 @@ HelloWorld.args = {
       default: "abced",
       gid: "header",
     },
+    binary_field: {
+      name: "binary value",
+      type: "Binary",
+      options: { validators: [{ allow_null: true }] },
+      default: "",
+    },
   },
   styles: {},
   groups: {
