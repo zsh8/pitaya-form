@@ -34,10 +34,10 @@ export const defaultValidateMessages = {
     range: "'${msgLabel}' must be between ${min} and ${max} characters",
   },
   number: {
-    len: "'${msgLabel}' must equal ${len}",
-    min: "'${msgLabel}' cannot be less than ${min}",
-    max: "'${msgLabel}' cannot be greater than ${max}",
-    range: "'${msgLabel}' must be between ${min} and ${max}",
+    len: "'${msgLabel}' must equal ${len} ${msgUnit}",
+    min: "'${msgLabel}' cannot be less than ${min} ${msgUnit}",
+    max: "'${msgLabel}' cannot be greater than ${max} ${msgUnit}",
+    range: "'${msgLabel}' must be between ${min} and ${max} ${msgUnit}",
   },
   array: {
     len: "'${msgLabel}' must be exactly ${len} in length",
@@ -67,7 +67,8 @@ export interface Validator {
 export function convertValidatorsToRules(
   validators: Validator[],
   valueType: any,
-  validateLabel: string
+  validateLabel: string,
+  validateUnit?: string
 ) {
   let rules: object[] = [];
 
@@ -112,7 +113,10 @@ export function convertValidatorsToRules(
   }
 
   for (const validator of validators) {
-    let rule: { [key: string]: any } = { msgLabel: validateLabel };
+    let rule: { [key: string]: any } = {
+      msgLabel: validateLabel,
+      msgUnit: validateUnit,
+    };
 
     const {
       allow_null: current_allow_null,

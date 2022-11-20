@@ -17,7 +17,7 @@ const FieldTypesMap = {
   Label: ["LabelField", "string", null],
   Password: ["PasswordField", "string", null],
   Binary: ["TextField", "string", null],
-  Duration: ["time", "number", null],
+  Duration: ["DurationField", "integer", 0],
   Hostname: ["TextField", "string", null],
   Port: ["NumberField", "number", null],
   PortRange: ["TextField", "string", null],
@@ -107,8 +107,14 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   }
 
   const validateLabel = fieldProps.name;
+  const validateUnit = fieldType === "Duration" ? "seconds" : "";
   const rules = {
-    rules: convertValidatorsToRules(validators, valueType, validateLabel),
+    rules: convertValidatorsToRules(
+      validators,
+      valueType,
+      validateLabel,
+      validateUnit
+    ),
   };
 
   let help = {};

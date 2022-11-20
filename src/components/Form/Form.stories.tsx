@@ -193,6 +193,12 @@ HelloWorld.args = {
       options: { validators: [{ allow_null: true }] },
       default: "",
     },
+    duration_field: {
+      name: "duration",
+      type: "Duration",
+      options: { validators: [{ min: 10, max: 1000 }] },
+      default: 604800,
+    },
   },
   styles: {},
   groups: {
