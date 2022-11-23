@@ -31,7 +31,7 @@ const FieldTypesMap = {
 
 export interface RawFieldProps {
   type?: keyof typeof FieldTypesMap;
-  fieldKey: string;
+  jsonKey: string;
   name?: string;
   description?: string;
   long_description?: string;
@@ -44,7 +44,7 @@ export interface RawFieldProps {
 }
 
 export interface FieldProps {
-  fieldKey: string;
+  jsonKey: string;
   name: string;
   default: any;
   value: any;
@@ -94,7 +94,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
 
   // fields with null name should hava no label in the form
   const showLabel = fieldProps.name !== null;
-  fieldProps.name = fieldProps.name?.toString() || fieldProps.fieldKey;
+  fieldProps.name = fieldProps.name?.toString() || fieldProps.jsonKey;
   let label = showLabel ? { label: fieldProps.name } : null;
 
   // set default value for events
@@ -139,7 +139,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
 
   // used as name property of Form.Item or Form.List components for initializing
   // value from form initialValue and setting value after calling onChange
-  let fieldPath = [...parentPath, fieldProps.fieldKey];
+  let fieldPath = [...parentPath, fieldProps.jsonKey];
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

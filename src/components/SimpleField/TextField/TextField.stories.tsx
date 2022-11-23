@@ -15,12 +15,12 @@ const Template: ComponentStory<typeof TextField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "text_field",
+  jsonKey: "text_field",
 };
 
 export const TextFieldWithOptions = Template.bind({});
 TextFieldWithOptions.args = {
-  fieldKey: "first_name",
+  jsonKey: "first_name",
   name: "first name",
   default: "\u06cc\u06a9 \u0631\u0634\u062a\u0647",
   options: {},

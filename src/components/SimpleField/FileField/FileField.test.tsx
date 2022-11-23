@@ -7,11 +7,14 @@ describe("FileField", () => {
   test("renders the FileField component", () => {
     render(
       <FileField
-        fieldKey="file_field"
+        jsonKey="file_field"
         name="attach"
         default={null}
         options={{}}
         events={{}}
+        value={""}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });

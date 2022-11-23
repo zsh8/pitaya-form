@@ -7,11 +7,14 @@ describe("NumberField", () => {
   test("renders the NumberField component", () => {
     render(
       <NumberField
-        fieldKey="port"
+        jsonKey="port"
         name="port"
         default={0}
         options={{}}
         events={{}}
+        value={""}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });

@@ -7,11 +7,14 @@ describe("ChoicesField", () => {
   test("renders the ChoicesField component", () => {
     render(
       <ChoicesField
-        fieldKey="protocol"
+        jsonKey="protocol"
         name="protocol"
         default={null}
         options={{}}
         events={{}}
+        value={""}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });

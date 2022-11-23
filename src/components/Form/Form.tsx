@@ -37,6 +37,10 @@ export interface PitayaFormProps {
    * entered values by the user
    */
   input?: { [key: string]: any };
+  /**
+   * A function that will be balled by form submission
+   */
+  submit?: (values: any) => any;
 }
 
 export interface RawGroupProps {
@@ -59,7 +63,7 @@ type ActionProps = {
  * @param props specification of form
  * @returns an antd Form component
  */
-const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
+const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const [form] = Form.useForm();
 
   const handleSubmit = (values: any) => {
@@ -73,9 +77,9 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const initialDataModel = props.input || {};
 
   let formChildrenMap = new Map<string, any>();
-  for (const fieldKey in props.form) {
-    const { gid = rootGroup, ...fieldProps } = props.form[fieldKey];
-    fieldProps.fieldKey = fieldKey;
+  for (const jsonKey in props.form) {
+    const { gid = rootGroup, ...fieldProps } = props.form[jsonKey];
+    fieldProps.jsonKey = jsonKey;
     fieldProps.parentPath = formPath;
 
     let currentGid: string = gid;
@@ -94,7 +98,7 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         const { gid: groupGid = rootGroup, ...otherProps } =
           props.groups?.[currentGid] || {};
         const groupProps: any = { ...otherProps };
-        groupProps.fieldKey = currentGid;
+        groupProps.jsonKey = currentGid;
         if (groupGid === rootGroup) groupProps.parentPath = formPath;
 
         groupProps.childrenMap = new Map<string, any>();
@@ -108,7 +112,7 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       }
     }
     // add the current field properties as a child to the parent children
-    parentChildren.set(`simple_${fieldKey}`, fieldProps);
+    parentChildren.set(`simple_${jsonKey}`, fieldProps);
   }
 
   let formChildren = [];
@@ -117,11 +121,11 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   for (const [key, fieldProps] of formChildrenMap) {
     if (key.startsWith("simple_")) {
       formChildren.push(
-        <SimpleField key={fieldProps.fieldKey} {...fieldProps} />
+        <SimpleField key={fieldProps.jsonKey} {...fieldProps} />
       );
     } else {
       formChildren.push(
-        <GroupField key={fieldProps.fieldKey} {...fieldProps}></GroupField>
+        <GroupField key={fieldProps.jsonKey} {...fieldProps}></GroupField>
       );
     }
   }
@@ -134,7 +138,7 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         layout={"vertical"}
         colon={false}
         validateMessages={defaultValidateMessages}
-        onFinish={handleSubmit}>
+        onFinish={props.submit || handleSubmit}>
         <Row>
           {formChildren.map((formChild, index) => (
             <Col
@@ -153,4 +157,4 @@ const App: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   );
 };
 
-export default App;
+export default PitayaForm;

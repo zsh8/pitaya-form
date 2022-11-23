@@ -15,12 +15,12 @@ const Template: ComponentStory<typeof PasswordField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "password_field",
+  jsonKey: "password_field",
 };
 
 export const PasswordFieldWithOptions = Template.bind({});
 PasswordFieldWithOptions.args = {
-  fieldKey: "password",
+  jsonKey: "password",
   name: "password",
   default: false,
   options: {},

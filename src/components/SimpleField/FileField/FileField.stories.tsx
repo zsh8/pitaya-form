@@ -14,7 +14,7 @@ const Template: ComponentStory<typeof FileField> = (args) => (
 
 export const FileFieldWithOptions = Template.bind({});
 FileFieldWithOptions.args = {
-  fieldKey: "file",
+  jsonKey: "file",
   name: "attachments",
   default: false,
   options: {},

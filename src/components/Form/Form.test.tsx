@@ -1,12 +1,12 @@
 import React from "react";
 import { render } from "@testing-library/react";
 
-import Form from "./Form";
+import PitayaForm from "./Form";
 
 describe("Form", () => {
   test("renders the Form component", () => {
     render(
-      <Form
+      <PitayaForm
         version="1"
         form={{
           device_name: {

@@ -7,11 +7,14 @@ describe("BooleanField", () => {
   test("renders the BooleanField component", () => {
     render(
       <BooleanField
-        fieldKey="verify_ssl"
+        jsonKey="verify_ssl"
         name="verify ssl"
         default={false}
         options={{}}
         events={{}}
+        value={""}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });

@@ -15,12 +15,12 @@ const Template: ComponentStory<typeof BooleanField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "boolean_field",
+  jsonKey: "boolean_field",
 };
 
 export const BooleanFieldWithOptions = Template.bind({});
 BooleanFieldWithOptions.args = {
-  fieldKey: "verify_ssl",
+  jsonKey: "verify_ssl",
   name: "verify ssl",
   default: false,
   options: {},

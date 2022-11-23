@@ -15,7 +15,7 @@ const Template: ComponentStory<typeof NumberField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "number_field",
+  jsonKey: "number_field",
   default: null,
   options: {},
   events: {},
@@ -23,7 +23,7 @@ Primary.args = {
 
 export const NumberFieldWithOptions = Template.bind({});
 NumberFieldWithOptions.args = {
-  fieldKey: "port",
+  jsonKey: "port",
   name: "port",
   default: 12,
   options: { signed: true, float: true },

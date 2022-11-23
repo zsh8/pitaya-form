@@ -15,7 +15,7 @@ const Template: ComponentStory<typeof DurationField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "duration_field",
+  jsonKey: "duration_field",
   default: null,
   options: {},
   events: {},
@@ -23,7 +23,7 @@ Primary.args = {
 
 export const DurationFieldWithOptions = Template.bind({});
 DurationFieldWithOptions.args = {
-  fieldKey: "duration",
+  jsonKey: "duration",
   name: "duration",
   default: 12000,
   options: {},

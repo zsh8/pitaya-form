@@ -7,11 +7,14 @@ describe("TextField", () => {
   test("renders the TextField component", () => {
     render(
       <TextField
-        fieldKey="verify_ssl"
+        jsonKey="verify_ssl"
         name="verify ssl"
         default=""
         options={{}}
         events={{}}
+        value={""}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });

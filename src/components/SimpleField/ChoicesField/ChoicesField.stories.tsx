@@ -15,12 +15,12 @@ const Template: ComponentStory<typeof ChoicesField> = (args) => (
 // Primary
 export const Primary = Template.bind({});
 Primary.args = {
-  fieldKey: "choices_field",
+  jsonKey: "choices_field",
 };
 
 export const ChoicesFieldWithOptions = Template.bind({});
 ChoicesFieldWithOptions.args = {
-  fieldKey: "protocol",
+  jsonKey: "protocol",
   name: "protocol ssl",
   default: false,
   options: {},

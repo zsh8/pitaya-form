@@ -6,7 +6,7 @@ import SimpleField from "../SimpleField";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 export interface GroupProps extends RawGroupProps {
-  fieldKey: string;
+  jsonKey: string;
   childrenMap: any;
   parentPath: string[];
 }
@@ -45,7 +45,7 @@ const GroupField: React.FC<GroupProps> = (props: GroupProps) => {
     props.target_group === null // null target group indicates no change in data model path
       ? [...parentPath]
       : props.target_group === undefined
-      ? [...parentPath, props.fieldKey]
+      ? [...parentPath, props.jsonKey]
       : [...parentPath, props.target_group];
 
   /**
@@ -64,12 +64,10 @@ const GroupField: React.FC<GroupProps> = (props: GroupProps) => {
       let childIsSimple = key.startsWith("simple_");
 
       if (childIsSimple) {
-        children.push(
-          <SimpleField key={childProps.fieldKey} {...childProps} />
-        );
+        children.push(<SimpleField key={childProps.jsonKey} {...childProps} />);
       } else {
         children.push(
-          <GroupField key={childProps.fieldKey} {...childProps}></GroupField>
+          <GroupField key={childProps.jsonKey} {...childProps}></GroupField>
         );
       }
     }
@@ -100,7 +98,7 @@ const GroupField: React.FC<GroupProps> = (props: GroupProps) => {
           ))}
           <Form.Item>
             <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
-              {`Add ${props.name || props.fieldKey}`}
+              {`Add ${props.name || props.jsonKey}`}
             </Button>
           </Form.Item>
         </>

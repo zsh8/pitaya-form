@@ -7,11 +7,14 @@ describe("DurationField", () => {
   test("renders the DurationField component", () => {
     render(
       <DurationField
-        fieldKey="duration"
+        jsonKey="duration"
         name="duration"
         default={0}
         options={{}}
         events={{}}
+        value={0}
+        onChange={(v: any) => v}
+        onBlur={(v: any) => v}
       />
     );
   });
