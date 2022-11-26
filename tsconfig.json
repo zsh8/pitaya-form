@@ -104,7 +104,7 @@
     "module": "ESNext",
     "declaration": true,
     "declarationDir": "types",
-    "sourceMap": true,
+    // "sourceMap": true,
     "outDir": "dist",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,

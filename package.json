@@ -1,5 +1,8 @@
 {
-  "name": "pitaya-form",
+  "name": "@zsh8/pitaya-form",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/zsh8"
+  },
   "version": "0.0.1",
   "description": "Implement pitaya forms",
   "scripts": {
