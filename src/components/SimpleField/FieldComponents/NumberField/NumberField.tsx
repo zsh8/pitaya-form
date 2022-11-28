@@ -1,6 +1,6 @@
 import React from "react";
 import { InputNumber } from "antd";
-import { FieldProps } from "..";
+import { FieldProps } from "../..";
 import "./NumberField.css";
 
 const NumberField = (props: FieldProps) => {

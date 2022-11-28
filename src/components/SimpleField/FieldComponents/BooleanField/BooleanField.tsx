@@ -1,7 +1,7 @@
 import { Checkbox } from "antd";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import React from "react";
-import { FieldProps } from "..";
+import { FieldProps } from "../..";
 import "./BooleanField.css";
 
 const BooleanField = (props: FieldProps) => {

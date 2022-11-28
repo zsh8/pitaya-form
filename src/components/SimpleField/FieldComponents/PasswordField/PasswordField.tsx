@@ -1,14 +1,13 @@
 import { Input } from "antd";
 import React from "react";
-import { FieldProps } from "..";
-import "./TextField.css";
+import { FieldProps } from "../..";
+import "./PasswordField.css";
 
-const TextField = (props: FieldProps) => {
+const PasswordField = (props: FieldProps) => {
   let value = props.value;
 
   return (
-    <Input
-      type="text"
+    <Input.Password
       value={value}
       onChange={props.onChange}
       onBlur={props.onBlur}
@@ -16,4 +15,4 @@ const TextField = (props: FieldProps) => {
   );
 };
 
-export default TextField;
+export default PasswordField;

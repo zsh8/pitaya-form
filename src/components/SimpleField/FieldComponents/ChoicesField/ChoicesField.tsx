@@ -1,6 +1,6 @@
 import { Tooltip, TreeSelect } from "antd";
 import React, { ReactNode } from "react";
-import { FieldProps } from "..";
+import { FieldProps } from "../..";
 import "./ChoicesField.css";
 
 interface OptionDetails {

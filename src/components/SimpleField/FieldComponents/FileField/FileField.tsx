@@ -2,7 +2,7 @@ import React from "react";
 import { DownloadOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
 import type { RcFile, UploadFile, UploadProps } from "antd/es/upload";
-import { FieldProps } from "..";
+import { FieldProps } from "../..";
 import "./FileField.css";
 
 interface ExtendedUploadFile extends UploadFile {

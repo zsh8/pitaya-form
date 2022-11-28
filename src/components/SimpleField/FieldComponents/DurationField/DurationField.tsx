@@ -1,6 +1,6 @@
 import React from "react";
 import { Col, Row, InputNumber, Slider } from "antd";
-import { FieldProps } from "..";
+import { FieldProps } from "../..";
 import "./DurationField.css";
 
 const DurationField = (props: FieldProps) => {

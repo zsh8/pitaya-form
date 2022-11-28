@@ -1,33 +1,34 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import { Form, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { convertValidatorsToRules, Validator } from "../../utils/validation";
+import * as fields from "./FieldComponents";
 import "./SimpleField.css";
 
 // keys are the PitayaForm fields type and each value is a triple
-// containing the custom component name, value type for validation
+// containing the custom component type, value type for validation
 // purposes and default value for each type
 const FieldTypesMap = {
-  Boolean: ["BooleanField", "boolean", false],
-  Number: ["NumberField", "number", 0],
-  String: ["TextField", "string", ""],
-  Choices: ["ChoicesField", "string", null],
-  DateTime: ["DateTimeField", "number", 0],
-  File: ["FileField", "object", null],
-  Label: ["LabelField", "string", null],
-  Password: ["PasswordField", "string", null],
-  Binary: ["TextField", "string", null],
-  Duration: ["DurationField", "integer", 0],
-  Hostname: ["TextField", "string", null],
-  Port: ["NumberField", "number", null],
-  PortRange: ["TextField", "string", null],
-  PrivateKey: ["FileField", "object", null],
-  RandomToken: ["fragment", "string", null],
-  Subnet: ["TextField", "string", null],
-  Location: ["TextField", "string", null],
-  TimePeriod: ["TextField", "string", null],
-  RavinUIUser: ["TextField", "string", null],
-};
+  Boolean: [fields.BooleanField, "boolean", false],
+  Number: [fields.NumberField, "number", 0],
+  String: [fields.TextField, "string", ""],
+  Choices: [fields.ChoicesField, "string", null],
+  DateTime: [fields.DateTimeField, "number", 0],
+  File: [fields.FileField, "object", null],
+  Label: [fields.LabelField, "string", null],
+  Password: [fields.PasswordField, "string", null],
+  Binary: [fields.TextField, "string", null],
+  Duration: [fields.DurationField, "integer", 0],
+  Hostname: [fields.TextField, "string", null],
+  Port: [fields.NumberField, "number", null],
+  PortRange: [fields.TextField, "string", null],
+  PrivateKey: [fields.FileField, "object", null],
+  RandomToken: [fields.TextField, "string", null],
+  Subnet: [fields.TextField, "string", null],
+  Location: [fields.TextField, "string", null],
+  TimePeriod: [fields.TextField, "string", null],
+  RavinUIUser: [fields.TextField, "string", null],
+} as const;
 
 export interface RawFieldProps {
   type?: keyof typeof FieldTypesMap;
@@ -78,8 +79,10 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
 
   let fieldProps: any = { ...otherProps };
 
-  let [componentName, valueType, typeDefaultValue] =
-    FieldTypesMap[fieldType ? fieldType : "String"]; // default field type is String
+  let FieldComponent: any, valueType: string, typeDefaultValue: any;
+
+  [FieldComponent, valueType, typeDefaultValue] =
+    FieldTypesMap[fieldType ? fieldType : "String"] || FieldTypesMap["String"]; // default field type is String
 
   if ((fieldType === "Choices" || fieldType === "File") && options.multiple) {
     valueType = "array";
@@ -89,8 +92,6 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   if (fieldType === "Label")
     // Label field could not be an array
     array = false;
-
-  const FieldComponent = lazy(() => import(`./${componentName}`));
 
   // fields with null name should hava no label in the form
   const showLabel = fieldProps.name !== null;
@@ -141,49 +142,45 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   // value from form initialValue and setting value after calling onChange
   let fieldPath = [...parentPath, fieldProps.jsonKey];
 
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      {array ? (
-        <Form.Item {...label} {...tooltip} {...help}>
-          <Form.List name={fieldPath} initialValue={fieldProps.default}>
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map((field) => (
-                  <Space
-                    key={field.key}
-                    style={{ display: "flex", marginBottom: 2 }}
-                    align="baseline">
-                    <Form.Item {...field} {...rules} validateTrigger="onBlur">
-                      <FieldComponent {...fieldProps} />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(field.name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add(typeDefaultValue)}
-                    icon={<PlusOutlined />}>
-                    {`Add ${fieldProps.name}`}
-                  </Button>
+  return array ? (
+    <Form.Item {...label} {...tooltip} {...help}>
+      <Form.List name={fieldPath} initialValue={fieldProps.default}>
+        {(fields, { add, remove }) => (
+          <>
+            {fields.map((field) => (
+              <Space
+                key={field.key}
+                style={{ display: "flex", marginBottom: 2 }}
+                align="baseline">
+                <Form.Item {...field} {...rules} validateTrigger="onBlur">
+                  <FieldComponent {...fieldProps} />
                 </Form.Item>
-              </>
-            )}
-          </Form.List>
-        </Form.Item>
-      ) : (
-        <Form.Item
-          name={fieldPath}
-          initialValue={fieldProps.default}
-          {...label}
-          {...tooltip}
-          {...help}
-          {...rules}
-          validateTrigger="onBlur">
-          <FieldComponent {...fieldProps} />
-        </Form.Item>
-      )}
-    </Suspense>
+                <MinusCircleOutlined onClick={() => remove(field.name)} />
+              </Space>
+            ))}
+            <Form.Item>
+              <Button
+                type="dashed"
+                onClick={() => add(typeDefaultValue)}
+                icon={<PlusOutlined />}>
+                {`Add ${fieldProps.name}`}
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
+    </Form.Item>
+  ) : (
+    <Form.Item
+      name={fieldPath}
+      initialValue={fieldProps.default}
+      {...label}
+      {...tooltip}
+      {...help}
+      {...rules}
+      validateTrigger="onBlur">
+      <FieldComponent {...fieldProps} />
+    </Form.Item>
   );
 };
 
