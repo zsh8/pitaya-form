@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Col, Form, Row } from "antd";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
+import "antd/dist/antd.css";
 import "./Form.css";
 import { defaultValidateMessages } from "../../utils/validation";
 
