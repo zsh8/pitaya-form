@@ -1,7 +1,7 @@
 import React from "react";
 import moment, { Moment } from "moment";
 import { DatePicker } from "antd";
-import { FieldProps } from "../..";
+import type { FieldProps } from "../..";
 import "./DateTimeField.css";
 
 const DateTimeField = (props: FieldProps) => {

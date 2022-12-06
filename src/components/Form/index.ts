@@ -1,1 +1,2 @@
-export { default, RawGroupProps } from "./Form";
+export { default } from "./Form";
+export type { RawGroupProps } from "./Form";

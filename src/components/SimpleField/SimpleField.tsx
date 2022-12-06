@@ -1,7 +1,8 @@
 import React from "react";
 import { Form, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { convertValidatorsToRules, Validator } from "../../utils/validation";
+import { convertValidatorsToRules } from "../../utils/validation";
+import type { Validator } from "../../utils/validation";
 import * as fields from "./FieldComponents";
 import "./SimpleField.css";
 

@@ -1,6 +1,6 @@
 import { Input } from "antd";
 import React from "react";
-import { FieldProps } from "../..";
+import type { FieldProps } from "../..";
 import "./TextField.css";
 
 const TextField = (props: FieldProps) => {

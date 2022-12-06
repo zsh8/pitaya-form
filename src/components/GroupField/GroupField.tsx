@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Card, Col, Form, Row, Space, Tooltip } from "antd";
 import "./GroupField.css";
-import { RawGroupProps } from "../Form";
+import type { RawGroupProps } from "../Form";
 import SimpleField from "../SimpleField";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
