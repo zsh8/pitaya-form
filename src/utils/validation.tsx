@@ -1,3 +1,5 @@
+import { isIP } from "is-ip";
+
 const typeTemplate = "'${msgLabel}' has not a valid value";
 
 export const defaultValidateMessages = {
@@ -163,10 +165,16 @@ export function convertValidatorsToRules(
 
     if (validator["hostname"]) {
       customValidator = (_: any, value: any) => {
-        const message = "'${msgLabel}' is not a valid hostname";
+        const message = "'${msgLabel}' is not a valid hostname or ip";
         if (typeof value !== "string") {
           return Promise.reject(new Error(message));
         }
+
+        value = value.trim();
+        // check the value is IPv6 or IPv4
+        if (isIP(value)) return Promise.resolve();
+
+        // check the value is a valid hostname
         if (value && value.slice(-1) === ".") {
           // It is valid for the last character to be a dot; strip
           // exactly one dot from the right, if present

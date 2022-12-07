@@ -199,6 +199,13 @@ HelloWorld.args = {
       options: { validators: [{ min: 10, max: 1000 }] },
       default: 604800,
     },
+    hostname_field: {
+      name: "host name",
+      type: "Hostname",
+      options: {},
+      default: null,
+      gid: "header",
+    },
   },
   styles: {},
   groups: {

@@ -108,6 +108,10 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     validators.push({ binary: true });
   }
 
+  if (fieldType === "Hostname") {
+    validators.push({ hostname: true });
+  }
+
   const validateLabel = fieldProps.name;
   const validateUnit = fieldType === "Duration" ? "seconds" : "";
   const rules = {
