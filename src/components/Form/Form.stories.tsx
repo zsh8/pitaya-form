@@ -206,6 +206,12 @@ HelloWorld.args = {
       default: null,
       gid: "header",
     },
+    submit_field: {
+      name: "add options",
+      type: "Submit",
+      options: {},
+      default: null,
+    },
   },
   styles: {},
   groups: {

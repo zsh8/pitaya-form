@@ -7,3 +7,4 @@ export { default as DurationField } from "./DurationField";
 export { default as DateTimeField } from "./DateTimeField";
 export { default as NumberField } from "./NumberField";
 export { default as ChoicesField } from "./ChoicesField";
+export { default as SubmitField } from "./SubmitField";

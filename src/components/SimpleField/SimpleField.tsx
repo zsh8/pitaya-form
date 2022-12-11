@@ -29,6 +29,7 @@ const FieldTypesMap = {
   Location: [fields.TextField, "string", null],
   TimePeriod: [fields.TextField, "string", null],
   RavinUIUser: [fields.TextField, "string", null],
+  Submit: [fields.SubmitField, "object", null],
 } as const;
 
 export interface RawFieldProps {
@@ -94,8 +95,8 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     // Label field could not be an array
     array = false;
 
-  // fields with null name should hava no label in the form
-  const showLabel = fieldProps.name !== null;
+  // fields with null name or "Submit" type should hava no label in the form
+  const showLabel = fieldProps.name !== null && fieldType !== "Submit";
   fieldProps.name = fieldProps.name?.toString() || fieldProps.jsonKey;
   let label = showLabel ? { label: fieldProps.name } : null;
 
