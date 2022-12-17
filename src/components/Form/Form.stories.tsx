@@ -224,7 +224,7 @@ HelloWorld.args = {
     },
     parent_group: {
       description: "parent with description without name",
-      gid: "last parent",
+      gid: "non_existent_group",
       array: true,
     },
     null_group: { name: "group with null target", target_group: null },
@@ -239,7 +239,7 @@ HelloWorld.args = {
   input: {
     main: {
       host: ["input host value"],
-      "last parent": { parent_group: [{ first_name: "input name value" }] },
+      parent_group: [{ first_name: "input name value" }],
       null_group: { single_field: "input value inside group" },
       array_group: [{ single_number: 9999 }, { single_number: 2222 }],
       single_field: "input value with null target group",

@@ -97,7 +97,10 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       if (!parentChildren.has(`group_${currentGid}`)) {
         // create the new group properties by groups specification
         const { gid: groupGid = rootGroup, ...otherProps } =
-          props.groups?.[currentGid] || {};
+          props.groups && currentGid in props.groups
+            ? props.groups[currentGid] || {}
+            : // non-existent group means no change in data model
+              { target_group: null };
         const groupProps: any = { ...otherProps };
         groupProps.jsonKey = currentGid;
         if (groupGid === rootGroup) groupProps.parentPath = formPath;
