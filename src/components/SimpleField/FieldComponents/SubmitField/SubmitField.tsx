@@ -5,7 +5,12 @@ import "./SubmitField.css";
 
 const SubmitField = (props: FieldProps) => {
   let name = props.name;
-  return <Button type="primary">{name}</Button>;
+
+  return (
+    <Button type="primary" {...props.events}>
+      {name}
+    </Button>
+  );
 };
 
 export default SubmitField;

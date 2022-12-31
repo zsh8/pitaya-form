@@ -1,8 +1,8 @@
 import React from "react";
 import { Form, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { convertValidatorsToRules } from "../../utils/validation";
-import type { Validator } from "../../utils/validation";
+import { convertValidatorsToRules } from "../../utils";
+import type { Validator } from "../../utils";
 import * as fields from "./FieldComponents";
 import "./SimpleField.css";
 
@@ -100,8 +100,6 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   fieldProps.name = fieldProps.name?.toString() || fieldProps.jsonKey;
   let label = showLabel ? { label: fieldProps.name } : null;
 
-  // set default value for events
-  if (!("events" in fieldProps)) fieldProps.events = {};
   const { validators = [], ...restOptions } = options;
   fieldProps.options = restOptions;
 

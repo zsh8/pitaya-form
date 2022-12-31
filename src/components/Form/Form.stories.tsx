@@ -12,6 +12,73 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Form> = (args) => <Form {...args} />;
 
+export const actionForm = Template.bind({});
+actionForm.args = {
+  form: {
+    country: {
+      name: "Countries",
+      type: "Choices",
+      options: {
+        choices: {
+          iran: { name: "Iran" },
+          afghanistan: { name: "Afghanistan" },
+        },
+        multiple: true,
+      },
+      events: {
+        change: ["test_action"],
+      },
+    },
+    city: {
+      name: "Cities",
+      type: "Choices",
+    },
+
+    submit_field: {
+      name: "log message",
+      type: "Submit",
+      options: {},
+      default: null,
+      events: { click: ["test_action"] },
+    },
+  },
+  groups: {
+    address: { array: true, default: [{}] },
+  },
+  actions: {
+    test_action: [
+      {
+        rpc: {
+          type: "js",
+          name: "get_cities",
+          arguments: {
+            countries: {
+              mode: "value",
+              type: "simple",
+              value: ["iran"],
+            },
+          },
+        },
+      },
+      {
+        rpc: {
+          type: "js",
+          name: "show_value",
+          arguments: {
+            value: {
+              mode: "value",
+              type: "simple",
+              value: "anything",
+            },
+          },
+        },
+      },
+    ],
+  },
+
+  js: 'function get_cities({countries}) {console.log( Object.assign({}, ...countries.map(country => ({"iran": {"tehran": {"name": "Tehran"},"esfahan": {"name": "Esfahan"}},"afghanistan": {"kabul": {"name": "Kabul"},"herat": {"name": "Herat"}}}[country]))));} function show_value({value}){console.log(value);}',
+};
+
 export const HelloWorld = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 HelloWorld.args = {
