@@ -14,6 +14,20 @@ const DurationField = (props: FieldProps) => {
     days: Math.floor(initialSeconds / 86400),
   };
 
+  const {
+    onChange: onChangeEvent,
+    onAfterChange: onAfterChangeEvent,
+    onBlur: onBlurEvent,
+    ...otherEvents
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  const handleBlur = (value: any) => {
+    props.onBlur(value);
+    onBlurEvent?.();
+  };
+
   const handleChange = (
     precision: string,
     value: any,
@@ -35,6 +49,9 @@ const DurationField = (props: FieldProps) => {
         newValue = { ...initialValue, days: value };
         break;
     }
+    onChangeEvent?.();
+    onAfterChangeEvent?.();
+
     const newSeconds = totalSeconds(newValue);
     props.onChange(newSeconds);
     if (validate) props.onBlur(newSeconds);
@@ -62,13 +79,14 @@ const DurationField = (props: FieldProps) => {
         <Col span={2}>
           <label>Days</label>
         </Col>
-        {/* key is used to enforce re-rendering after changeing initial value */}
+        {/* key is used to enforce re-rendering after changing initial value */}
         <Col span={12} key={initialValue.days}>
           <Slider
             min={0}
             max={8000}
             defaultValue={initialValue.days}
             onAfterChange={(value: number) => handleChange("DAYS", value, true)}
+            {...otherEvents}
           />
         </Col>
         <Col span={4}>
@@ -77,7 +95,8 @@ const DurationField = (props: FieldProps) => {
             max={8000}
             value={initialValue.days}
             onChange={(value: number | null) => handleChange("DAYS", value)}
-            onBlur={props.onBlur}
+            onBlur={handleBlur}
+            {...otherEvents}
           />
         </Col>
       </Row>
@@ -93,6 +112,7 @@ const DurationField = (props: FieldProps) => {
             onAfterChange={(value: number) =>
               handleChange("HOURS", value, true)
             }
+            {...otherEvents}
           />
         </Col>
         <Col span={4}>
@@ -101,7 +121,8 @@ const DurationField = (props: FieldProps) => {
             max={23}
             value={initialValue.hours}
             onChange={(value: number | null) => handleChange("HOURS", value)}
-            onBlur={props.onBlur}
+            onBlur={handleBlur}
+            {...otherEvents}
           />
         </Col>
       </Row>
@@ -117,6 +138,7 @@ const DurationField = (props: FieldProps) => {
             onAfterChange={(value: number) =>
               handleChange("MINUTES", value, true)
             }
+            {...otherEvents}
           />
         </Col>
         <Col span={4}>
@@ -125,7 +147,8 @@ const DurationField = (props: FieldProps) => {
             max={59}
             value={initialValue.minutes}
             onChange={(value: number | null) => handleChange("MINUTES", value)}
-            onBlur={props.onBlur}
+            onBlur={handleBlur}
+            {...otherEvents}
           />
         </Col>
       </Row>
@@ -141,6 +164,7 @@ const DurationField = (props: FieldProps) => {
             onAfterChange={(value: number) =>
               handleChange("SECONDS", value, true)
             }
+            {...otherEvents}
           />
         </Col>
         <Col span={4}>
@@ -149,7 +173,8 @@ const DurationField = (props: FieldProps) => {
             max={59}
             value={initialValue.seconds}
             onChange={(value: number | null) => handleChange("SECONDS", value)}
-            onBlur={props.onBlur}
+            onBlur={handleBlur}
+            {...otherEvents}
           />
         </Col>
       </Row>

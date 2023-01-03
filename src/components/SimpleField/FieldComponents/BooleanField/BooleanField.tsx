@@ -11,7 +11,19 @@ const BooleanField = (props: FieldProps) => {
     props.onBlur(e.target.checked);
   };
 
-  return <Checkbox checked={value} onChange={handleChange} />;
+  const {
+    onChange: onChangeEvent,
+    ...events
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  events["onChange"] = (e: CheckboxChangeEvent) => {
+    handleChange(e);
+    onChangeEvent?.();
+  };
+
+  return <Checkbox checked={value} {...events} />;
 };
 
 export default BooleanField;

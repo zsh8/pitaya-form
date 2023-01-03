@@ -18,14 +18,25 @@ const NumberField = (props: FieldProps) => {
 
   let value = props.value;
 
-  return (
-    <InputNumber
-      value={value}
-      onChange={props.onChange}
-      onBlur={props.onBlur}
-      {...options}
-    />
-  );
+  const {
+    onChange: onChangeEvent,
+    onBlur: onBlurEvent,
+    ...events
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  events["onChange"] = (value: any) => {
+    props.onChange(value);
+    onChangeEvent?.();
+  };
+
+  events["onBlur"] = (value: any) => {
+    props.onBlur(value);
+    onBlurEvent?.();
+  };
+
+  return <InputNumber value={value} {...events} {...options} />;
 };
 
 export default NumberField;

@@ -105,6 +105,18 @@ const FileField = (props: FieldProps) => {
     }
   };
 
+  const {
+    onChange: onChangeEvent,
+    ...events
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  events["onChange"] = (value: any) => {
+    handleChange(value);
+    onChangeEvent?.();
+  };
+
   const uploadProps: UploadProps = {
     defaultFileList: initialFileList,
     multiple: multiple,
@@ -112,7 +124,7 @@ const FileField = (props: FieldProps) => {
       showDownloadIcon: true,
       downloadIcon: <DownloadOutlined />,
     },
-    onChange: handleChange,
+    ...events,
   };
 
   if (uploadUrl) {

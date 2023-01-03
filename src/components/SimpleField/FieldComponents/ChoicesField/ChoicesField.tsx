@@ -61,6 +61,24 @@ const ChoicesField = (props: FieldProps) => {
     props.onBlur(value);
   };
 
+  const {
+    onChange: onChangeEvent,
+    onBlur: onBlurEvent,
+    ...events
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  events["onChange"] = (value: any) => {
+    handleChange(value);
+    onChangeEvent?.();
+  };
+
+  events["onBlur"] = (value: any) => {
+    props.onBlur(value);
+    onBlurEvent?.();
+  };
+
   return (
     <TreeSelect
       value={value}
@@ -77,8 +95,7 @@ const ChoicesField = (props: FieldProps) => {
       dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
       dropdownMatchSelectWidth={false}
       placeholder="Please select"
-      onChange={handleChange}
-      onBlur={props.onBlur}
+      {...events}
     />
   );
 };

@@ -52,6 +52,24 @@ const DateTimeField = (props: FieldProps) => {
     props.onChange(value);
   };
 
+  const {
+    onChange: onChangeEvent,
+    onBlur: onBlurEvent,
+    ...events
+  }: { [key: string]: (...args: any[]) => void } = {
+    ...props.events,
+  };
+
+  events["onChange"] = (dateTime: Moment | null, dateString: string) => {
+    handleChange(dateTime, dateString);
+    onChangeEvent?.();
+  };
+
+  events["onBlur"] = (value: any) => {
+    props.onBlur(value);
+    onBlurEvent?.();
+  };
+
   return (
     // TODO: add jalali DatePicker
     <DatePicker
@@ -59,8 +77,7 @@ const DateTimeField = (props: FieldProps) => {
       {...dateTimeFormat}
       picker={picker}
       showTime={showTime}
-      onChange={handleChange}
-      onBlur={props.onBlur}
+      {...events}
     />
   );
 };

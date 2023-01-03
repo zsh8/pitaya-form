@@ -43,7 +43,7 @@ export interface RawFieldProps {
   array?: boolean;
   order?: number;
   options?: OptionsProps;
-  events?: object;
+  events: { [key: string]: () => void };
 }
 
 export interface FieldProps {
@@ -54,7 +54,7 @@ export interface FieldProps {
   onChange: any;
   onBlur: any;
   options: OptionsProps;
-  events: object;
+  events: { [key: string]: () => void };
 }
 
 interface OptionsProps {
