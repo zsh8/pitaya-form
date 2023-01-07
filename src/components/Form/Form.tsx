@@ -6,6 +6,8 @@ import "antd/dist/antd.css";
 import "./Form.css";
 import { defaultValidateMessages } from "../../utils";
 
+const jsonPath = require("jsonpath");
+
 export interface PitayaFormProps {
   /**
    * Version of PitayaForm specification
@@ -74,6 +76,7 @@ type ArgSpec = {
   mode?: "value" | "document_reference";
   type?: string;
   value?: any;
+  reference?: any;
 };
 
 interface RPCSpec {
@@ -160,17 +163,40 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   function makeArguments(argsSpec: { [key: string]: ArgSpec }) {
     const args: { [key: string]: any } = {};
     for (const [argName, argSpec] of Object.entries(argsSpec)) {
-      let value: any = null;
+      let value: any = argSpec.value;
       const argMode = argSpec.mode || "value";
       const argType = argSpec.type || "simple";
 
-      if (argMode === "value") {
-        if (argType === "simple") {
-          value = argSpec.value;
+      switch (argMode) {
+        case "value": {
+          switch (argType) {
+            case "simple": {
+              value = argSpec.value;
+              break;
+            }
+          }
+          break;
         }
+        case "document_reference":
+          {
+            switch (argType) {
+              case "jsonpath": {
+                const path = String(argSpec.reference);
+                const currentState = {
+                  ...state,
+                  input: form.getFieldsValue(true),
+                };
+                let queryResult = jsonPath.query(currentState, path);
+
+                value = queryResult.length > 0 ? queryResult[0] : null;
+              }
+            }
+          }
+          break;
       }
       args[argName] = value;
     }
+
     return args;
   }
 

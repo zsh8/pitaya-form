@@ -28,10 +28,14 @@ actionForm.args = {
       events: {
         change: ["test_action"],
       },
+      gid: "address",
+      array: true,
+      default: [[]],
     },
     city: {
       name: "Cities",
       type: "Choices",
+      gid: "address",
     },
 
     submit_field: {
@@ -53,9 +57,9 @@ actionForm.args = {
           name: "get_cities",
           arguments: {
             countries: {
-              mode: "value",
-              type: "simple",
-              value: ["iran"],
+              mode: "document_reference",
+              type: "jsonpath",
+              reference: "input.address[0].country[0]",
             },
           },
         },
@@ -66,9 +70,9 @@ actionForm.args = {
           name: "show_value",
           arguments: {
             value: {
-              mode: "value",
-              type: "simple",
-              value: "anything",
+              mode: "document_reference",
+              type: "jsonpath",
+              reference: "groups.address",
             },
           },
         },

@@ -60,6 +60,7 @@
   "peerDependencies": {
     "antd": "^4.24.3",
     "is-ip": "^5.0.0",
+    "jsonpath": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }
