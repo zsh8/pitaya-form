@@ -26,31 +26,27 @@ actionForm.args = {
         multiple: true,
       },
       events: {
-        change: ["test_action"],
+        change: ["update_cities"],
       },
       gid: "address",
-      array: true,
-      default: [[]],
     },
     city: {
       name: "Cities",
       type: "Choices",
+      options: {
+        choices: {
+          tehran: { name: "Tehran" },
+          esfahan: { name: "Esfahan" },
+        },
+      },
       gid: "address",
-    },
-
-    submit_field: {
-      name: "log message",
-      type: "Submit",
-      options: {},
-      default: null,
-      events: { click: ["test_action"] },
     },
   },
   groups: {
-    address: { array: true, default: [{}] },
+    address: { array: false },
   },
   actions: {
-    test_action: [
+    update_cities: [
       {
         rpc: {
           type: "js",
@@ -59,20 +55,7 @@ actionForm.args = {
             countries: {
               mode: "document_reference",
               type: "jsonpath",
-              reference: "input.address[0].country[0]",
-            },
-          },
-        },
-      },
-      {
-        rpc: {
-          type: "js",
-          name: "show_value",
-          arguments: {
-            value: {
-              mode: "document_reference",
-              type: "jsonpath",
-              reference: "groups.address",
+              reference: "input.address.country",
             },
           },
         },
@@ -80,7 +63,7 @@ actionForm.args = {
     ],
   },
 
-  js: 'function get_cities({countries}) {console.log( Object.assign({}, ...countries.map(country => ({"iran": {"tehran": {"name": "Tehran"},"esfahan": {"name": "Esfahan"}},"afghanistan": {"kabul": {"name": "Kabul"},"herat": {"name": "Herat"}}}[country]))));} function show_value({value}){console.log(value);}',
+  js: 'function get_cities({countries}) { return [{"update": {"input":{"address":{"city": (countries[0]==="iran")?"tehran":(countries[0]==="afghanistan")?"kabul":null}}, "form": {"city": {"options": {"choices": Object.assign({}, ...countries.map(country => ({"iran": {         "tehran": {"name": "Tehran"}, "esfahan": {"name": "Esfahan"}}, "afghanistan": {  "kabul": {"name": "Kabul"}, "herat": {"name": "Herat"}}}[country])))}}}}}];}',
 };
 
 export const HelloWorld = Template.bind({});

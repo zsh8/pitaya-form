@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 import { Button, Col, Form, Row } from "antd";
 import GroupField from "../GroupField";
 import SimpleField from "../SimpleField";
@@ -88,10 +88,31 @@ interface RPCSpec {
   on_failure?: string[];
 }
 
+type UpdateActionOptions = { extend_arrays?: boolean };
+
+type UpdateActionSpec = Partial<PitayaFormProps> & UpdateActionOptions;
+
+interface StateSpec extends Omit<PitayaFormProps, "submit" | "input"> {
+  actionFunctionsMap: { [key: string]: (() => any)[] };
+  inputChanges: Partial<PitayaFormProps["input"]>;
+  updateInput: boolean;
+  extendArrayInMerge: boolean;
+}
+
+type ReducerAction = {
+  type: "update" | "remove";
+  changes: Partial<PitayaFormProps>;
+  extendArrays?: boolean;
+};
+
 function makeJsFunctions(jsCode: string) {
   try {
     eval?.(jsCode);
   } catch (error) {}
+}
+
+function isObject(obj: any) {
+  return typeof obj === "object" && obj !== null && !Array.isArray(obj);
 }
 
 /**
@@ -107,25 +128,166 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     console.log(values);
   };
 
-  const initialInput = props.input || {};
+  const initialInput = { ...props.input } || {};
+
+  function initialState() {
+    const { input, submit, ...otherProps } = { ...props };
+    let initialState: StateSpec = {
+      ...otherProps,
+      actionFunctionsMap: createActionFunctionsMap(props.actions),
+      inputChanges: {},
+      updateInput: false,
+      extendArrayInMerge: false,
+    };
+    makeJsFunctions(initialState.js || "");
+
+    return initialState;
+  }
 
   const [state, dispatch] = useReducer(
-    (state: PitayaFormProps, newState: Partial<PitayaFormProps>) => {
-      return { ...state, ...newState };
+    (state: StateSpec, action: ReducerAction) => {
+      let newState = { ...state };
+      newState.updateInput = false;
+
+      switch (action.type) {
+        case "update":
+          {
+            const { input: inputChanges, ...otherChanges } = action.changes;
+            const extendArrays = action.extendArrays || false;
+
+            newState = deepMergeObject(newState, otherChanges, extendArrays);
+
+            if (isObject(inputChanges)) {
+              newState.inputChanges = inputChanges;
+              newState.updateInput = true;
+              newState.extendArrayInMerge = extendArrays;
+            }
+
+            if ("actions" in otherChanges) {
+              newState.actionFunctionsMap = createActionFunctionsMap(
+                newState.actions
+              );
+            }
+
+            if ("js" in otherChanges) {
+              makeJsFunctions(newState.js || "");
+            }
+          }
+          break;
+      }
+      return newState;
     },
-    { ...props }
+    {},
+    () => initialState()
   );
 
-  makeJsFunctions(state.js || "");
+  useEffect(() => {
+    if (state.updateInput) {
+      const fieldsValue = convertInputChangesToFieldsValue(
+        state.inputChanges as {}
+      );
+      form.setFieldsValue(fieldsValue);
+    }
+  });
 
-  const actionsMap = createActionFunctionsMap();
+  function convertInputChangesToFieldsValue(
+    inputObj: Partial<PitayaFormProps["input"]>,
+    parentNamePath: string[] = []
+  ): Partial<PitayaFormProps["input"]> {
+    const fieldsValue: Partial<PitayaFormProps["input"]> = {};
+    for (const [fieldKey, value] of Object.entries(inputObj as {})) {
+      const fieldNamePath = [...parentNamePath, fieldKey];
+      if (isObject(value)) {
+        fieldsValue[fieldKey] = convertInputChangesToFieldsValue(
+          value as {},
+          fieldNamePath
+        );
+      } else {
+        if (state.extendArrayInMerge && Array.isArray(value)) {
+          // if current value is undefined or null
+          // replace with an empty array
+          const currentValue = form.getFieldValue(fieldNamePath) || [];
+          if (Array.isArray(currentValue))
+            fieldsValue[fieldKey] = [...currentValue, ...value];
+        } else fieldsValue[fieldKey] = value;
+      }
+    }
+    return fieldsValue;
+  }
 
   function makeActionFunctions(actionKey: ActionKey, actionSpec: object) {
     switch (actionKey) {
       case "rpc":
         return makeRPCFunction(actionSpec as RPCSpec);
+      case "update":
+        return makeUpdateFunction(actionSpec as UpdateActionSpec);
     }
     return () => null;
+  }
+
+  function makeUpdateFunction(updateSpec: UpdateActionSpec) {
+    if (!isObject(updateSpec))
+      // if updateSpec is not a real object, then
+      // an empty function should be returned
+      return () => null;
+
+    const { extend_arrays: extendArrays = false, ...changes } = {
+      ...updateSpec,
+    };
+
+    return () => {
+      dispatch({ type: "update", changes, extendArrays });
+    };
+  }
+
+  /**
+   * This function will accept the two objects as arguments and return the object of deeply
+   * merged with nested properties.
+   * @param {object} mainObj object containing the properties to be merged with changes.
+   * @param {object} changesObj object containing the properties you want to apply.
+   * @param {extendArrays} boolean inidcates that in case of array in value, new array should
+   * replace or be merged with the old one
+   * @return {object} return the deeply merged objects
+   */
+  function deepMergeObject(
+    mainObj: any = {},
+    changesObj: any = {},
+    extendArrays: boolean
+  ) {
+    // copy objects to avoid mutation
+    mainObj = { ...mainObj };
+    changesObj = { ...changesObj };
+
+    // iterating through all the keys of changes object
+    Object.keys(changesObj).forEach((key) => {
+      if (isObject(changesObj[key])) {
+        if (!isObject(mainObj[key])) {
+          // if equivalent value in main object is not a real object,
+          // then should be replaced with the value in changes object
+          mainObj[key] = changesObj[key];
+        } else {
+          // nested object should be merged
+          mainObj[key] = deepMergeObject(
+            mainObj[key],
+            changesObj[key],
+            extendArrays
+          );
+        }
+      } else {
+        if (
+          extendArrays &&
+          Array.isArray(changesObj[key]) &&
+          Array.isArray(mainObj[key])
+        ) {
+          // extend arrays in case of 'true' extendArrays option
+          mainObj[key] = [...mainObj[key], ...changesObj[key]];
+        }
+        // replace key's value in main object for non object values
+        else mainObj[key] = changesObj[key];
+      }
+    });
+
+    return mainObj;
   }
 
   function makeRPCFunction(rpcSpec: RPCSpec) {
@@ -147,8 +309,8 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         let actionNames = rpcSpec.on_failure || [];
         if (Array.isArray(actionNames)) {
           for (const act of actionNames) {
-            if (act in actionsMap) {
-              resultActions.push(...actionsMap[act]);
+            if (act in state.actionFunctionsMap) {
+              resultActions.push(...state.actionFunctionsMap[act]);
             }
           }
         }
@@ -200,10 +362,10 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     return args;
   }
 
-  function createActionFunctionsMap() {
-    const actionsDict: { [key: string]: (() => any)[] } = {};
+  function createActionFunctionsMap(actionsSpec: PitayaFormProps["actions"]) {
+    const actionsDict: StateSpec["actionFunctionsMap"] = {};
     for (const [actionKey, actionSpecList] of Object.entries(
-      state.actions || {}
+      actionsSpec || {}
     )) {
       actionsDict[actionKey] = convertActionsToFunctions(
         actionSpecList as ActionProps[]
@@ -231,6 +393,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const rootGroup = "_root";
   const formSpec = state.form || {};
   const groupsSpec = state.groups || {};
+  const actionFunctionsMap = state.actionFunctionsMap;
 
   const dataModelRoot = groupsSpec[rootGroup]?.target_group;
   const formPath = dataModelRoot ? [dataModelRoot] : [];
@@ -242,8 +405,8 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     for (const eventKey in events) {
       const eventActions: (() => any)[] = [];
       for (const act of events[eventKey]) {
-        if (act in actionsMap) {
-          eventActions.push(...actionsMap[act]);
+        if (act in actionFunctionsMap) {
+          eventActions.push(...actionFunctionsMap[act]);
         }
       }
       fieldEvents[EventsMap[eventKey as keyof typeof EventsMap] || "onClick"] =
