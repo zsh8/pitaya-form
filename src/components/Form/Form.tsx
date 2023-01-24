@@ -95,7 +95,8 @@ type UpdateActionSpec = Partial<PitayaFormProps> & UpdateActionOptions;
 interface StateSpec extends Omit<PitayaFormProps, "submit" | "input"> {
   actionFunctionsMap: { [key: string]: (() => any)[] };
   inputChanges: Partial<PitayaFormProps["input"]>;
-  updateInput: boolean;
+  changeInput: boolean;
+  changesType: "update" | "remove";
   extendArrayInMerge: boolean;
 }
 
@@ -136,7 +137,8 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       ...otherProps,
       actionFunctionsMap: createActionFunctionsMap(props.actions),
       inputChanges: {},
-      updateInput: false,
+      changeInput: false,
+      changesType: "update",
       extendArrayInMerge: false,
     };
     makeJsFunctions(initialState.js || "");
@@ -147,34 +149,40 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const [state, dispatch] = useReducer(
     (state: StateSpec, action: ReducerAction) => {
       let newState = { ...state };
-      newState.updateInput = false;
+      newState.changesType = action.type;
+      newState.extendArrayInMerge = action.extendArrays || false;
+      newState.changeInput = false;
+
+      const { input: inputChanges, ...otherChanges } = action.changes;
 
       switch (action.type) {
         case "update":
-          {
-            const { input: inputChanges, ...otherChanges } = action.changes;
-            const extendArrays = action.extendArrays || false;
-
-            newState = deepMergeObject(newState, otherChanges, extendArrays);
-
-            if (isObject(inputChanges)) {
-              newState.inputChanges = inputChanges;
-              newState.updateInput = true;
-              newState.extendArrayInMerge = extendArrays;
-            }
-
-            if ("actions" in otherChanges) {
-              newState.actionFunctionsMap = createActionFunctionsMap(
-                newState.actions
-              );
-            }
-
-            if ("js" in otherChanges) {
-              makeJsFunctions(newState.js || "");
-            }
-          }
+          newState = deepMergeObject(
+            newState,
+            otherChanges,
+            newState.extendArrayInMerge
+          );
+          break;
+        case "remove":
+          newState = deepRemoveProperties(newState, otherChanges);
           break;
       }
+
+      if (isObject(inputChanges)) {
+        newState.changeInput = true;
+        newState.inputChanges = inputChanges;
+      }
+
+      if ("actions" in otherChanges) {
+        newState.actionFunctionsMap = createActionFunctionsMap(
+          newState.actions
+        );
+      }
+
+      if ("js" in otherChanges) {
+        makeJsFunctions(newState.js || "");
+      }
+
       return newState;
     },
     {},
@@ -182,7 +190,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   );
 
   useEffect(() => {
-    if (state.updateInput) {
+    if (state.changeInput) {
       const fieldsValue = convertInputChangesToFieldsValue(
         state.inputChanges as {}
       );
@@ -198,18 +206,44 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     for (const [fieldKey, value] of Object.entries(inputObj as {})) {
       const fieldNamePath = [...parentNamePath, fieldKey];
       if (isObject(value)) {
-        fieldsValue[fieldKey] = convertInputChangesToFieldsValue(
-          value as {},
-          fieldNamePath
-        );
+        if (Object.keys(value as {}).length === 0) {
+          if (state.changesType === "remove") fieldsValue[fieldKey] = null;
+        } else {
+          fieldsValue[fieldKey] = convertInputChangesToFieldsValue(
+            value as {},
+            fieldNamePath
+          );
+        }
       } else {
-        if (state.extendArrayInMerge && Array.isArray(value)) {
-          // if current value is undefined or null
-          // replace with an empty array
-          const currentValue = form.getFieldValue(fieldNamePath) || [];
-          if (Array.isArray(currentValue))
-            fieldsValue[fieldKey] = [...currentValue, ...value];
-        } else fieldsValue[fieldKey] = value;
+        if (state.changesType === "update") {
+          // in case of update action
+          if (state.extendArrayInMerge && Array.isArray(value)) {
+            // if current value is undefined or null
+            // replace with an empty array
+            const currentValue = form.getFieldValue(fieldNamePath) || [];
+            if (Array.isArray(currentValue))
+              fieldsValue[fieldKey] = [...currentValue, ...value];
+          } else fieldsValue[fieldKey] = value;
+        } else {
+          // in case of remove action
+          if (value === null) {
+            fieldsValue[fieldKey] = null;
+          } else {
+            const currentValue = form.getFieldValue(fieldNamePath);
+
+            if (Array.isArray(currentValue)) {
+              // remove the first item of the array with the specified value
+              const foundIndex = currentValue.findIndex(
+                (element: any) => element === value
+              );
+              if (foundIndex >= 0) currentValue.splice(foundIndex, 1);
+              fieldsValue[fieldKey] = currentValue;
+            } else if (currentValue === value) {
+              // remove the current key if its value is equal to the specified value
+              fieldsValue[fieldKey] = null;
+            }
+          }
+        }
       }
     }
     return fieldsValue;
@@ -220,12 +254,16 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       case "rpc":
         return makeRPCFunction(actionSpec as RPCSpec);
       case "update":
-        return makeUpdateFunction(actionSpec as UpdateActionSpec);
+      case "remove":
+        return makeUpdateFunction(actionSpec as UpdateActionSpec, actionKey);
     }
     return () => null;
   }
 
-  function makeUpdateFunction(updateSpec: UpdateActionSpec) {
+  function makeUpdateFunction(
+    updateSpec: UpdateActionSpec,
+    actionKey: "remove" | "update"
+  ) {
     if (!isObject(updateSpec))
       // if updateSpec is not a real object, then
       // an empty function should be returned
@@ -236,7 +274,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     };
 
     return () => {
-      dispatch({ type: "update", changes, extendArrays });
+      dispatch({ type: actionKey, changes, extendArrays });
     };
   }
 
@@ -284,6 +322,52 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         }
         // replace key's value in main object for non object values
         else mainObj[key] = changesObj[key];
+      }
+    });
+
+    return mainObj;
+  }
+
+  /**
+   * This function will accept the two objects as arguments and return the firest object
+   * with deeply removed properties of the second object.
+   * @param {object} mainObj main object to apply deep removing properties.
+   * @param {object} changesObj object containing the properties you want to remove.
+   * @return {object} return the deeply subtracted object
+   */
+  function deepRemoveProperties(mainObj: any = {}, changesObj: any = {}) {
+    // copy objects to avoid mutation
+    mainObj = { ...mainObj };
+    changesObj = { ...changesObj };
+
+    // iterating through all the keys of changes object
+    Object.keys(changesObj).forEach((key) => {
+      if (
+        changesObj[key] === null ||
+        (isObject(changesObj[key]) && Object.keys(changesObj[key]).length === 0)
+      ) {
+        delete mainObj[key];
+      } else {
+        if (
+          isObject(changesObj[key]) // is not an empty object
+        ) {
+          if (isObject(mainObj[key])) {
+            // main object will be changed if the equivalent value in
+            // main object is a real object
+            mainObj[key] = deepRemoveProperties(mainObj[key], changesObj[key]);
+          }
+        } else {
+          if (Array.isArray(mainObj[key])) {
+            // remove the first item of the array with the specified value
+            const foundIndex = mainObj[key].findIndex(
+              (element: any) => element === changesObj[key]
+            );
+            if (foundIndex >= 0) mainObj[key].splice(foundIndex, 1);
+          } else if (mainObj[key] === changesObj[key]) {
+            // remove the key if its value is the specified value
+            delete mainObj[key];
+          }
+        }
       }
     });
 

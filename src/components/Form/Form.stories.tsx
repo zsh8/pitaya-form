@@ -12,8 +12,61 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Form> = (args) => <Form {...args} />;
 
-export const actionForm = Template.bind({});
-actionForm.args = {
+export const removeActionForm = Template.bind({});
+removeActionForm.args = {
+  form: {
+    title: {
+      name: "title",
+      type: "String",
+      gid: "address",
+    },
+    extra_options: {
+      name: "Advanced Options",
+      type: "Submit",
+      events: { click: ["add_extra_options"] },
+      gid: "address",
+    },
+    reset_title: {
+      name: "reset title",
+      type: "Submit",
+      events: { click: ["remove_title"] },
+      gid: "address",
+    },
+  },
+  groups: {
+    address: { name: "address", array: false, default: [{}] },
+  },
+  actions: {
+    add_extra_options: [
+      {
+        remove: { form: { extra_options: {} } },
+      },
+      {
+        update: {
+          form: {
+            details: { name: "Details", type: "String", gid: "advanced" },
+            conditions: { name: "Conditions", type: "String", gid: "advanced" },
+          },
+        },
+      },
+      {
+        update: {
+          groups: {
+            advanced: {
+              name: "Advanced Options",
+              target_group: null,
+              order: 2,
+            },
+          },
+        },
+      },
+    ],
+    remove_title: [{ remove: { input: { address: { title: null } } } }],
+  },
+};
+
+export const updateActionForm = Template.bind({});
+updateActionForm.args = {
   form: {
     country: {
       name: "Countries",
