@@ -7,6 +7,7 @@ describe("ChoicesField", () => {
   test("renders the ChoicesField component", () => {
     render(
       <ChoicesField
+        fieldType="Choices"
         jsonKey="protocol"
         name="protocol"
         default={null}

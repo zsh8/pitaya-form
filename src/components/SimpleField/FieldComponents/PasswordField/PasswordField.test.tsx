@@ -7,6 +7,7 @@ describe("PasswordField", () => {
   test("renders the PasswordField component", () => {
     render(
       <PasswordField
+        fieldType="Password"
         jsonKey="password"
         name="password"
         default={null}

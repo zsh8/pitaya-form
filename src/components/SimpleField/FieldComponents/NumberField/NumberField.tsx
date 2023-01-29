@@ -7,13 +7,20 @@ const NumberField = (props: FieldProps) => {
   const options: {
     step?: number;
     min?: number;
+    max?: number;
   } = {};
 
-  if (props.options.float) {
-    options.step = 0.001;
-  }
-  if (!props.options.signed) {
+  if (props.fieldType === "Port") {
     options.min = 0;
+    options.max = 65535;
+    options.step = 1;
+  } else {
+    if (props.options.float) {
+      options.step = 0.001;
+    }
+    if (!props.options.signed) {
+      options.min = 0;
+    }
   }
 
   let value = props.value;

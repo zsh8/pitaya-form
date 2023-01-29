@@ -7,6 +7,7 @@ describe("DurationField", () => {
   test("renders the DurationField component", () => {
     render(
       <DurationField
+        fieldType="Duration"
         jsonKey="duration"
         name="duration"
         default={0}

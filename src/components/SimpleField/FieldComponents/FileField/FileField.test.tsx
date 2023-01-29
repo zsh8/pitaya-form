@@ -7,6 +7,7 @@ describe("FileField", () => {
   test("renders the FileField component", () => {
     render(
       <FileField
+        fieldType="File"
         jsonKey="file_field"
         name="attach"
         default={null}

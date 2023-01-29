@@ -7,6 +7,7 @@ describe("DateTimeField", () => {
   test("renders the DateTimeField component", () => {
     render(
       <DateTimeField
+        fieldType="DateTime"
         jsonKey="birthday"
         name="birthday"
         default={false}

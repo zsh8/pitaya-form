@@ -7,6 +7,7 @@ describe("SubmitField", () => {
   test("renders the SubmitField component", () => {
     render(
       <SubmitField
+        fieldType="Submit"
         jsonKey="options"
         name="add options"
         default={null}

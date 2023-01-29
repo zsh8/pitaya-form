@@ -7,6 +7,7 @@ describe("TextField", () => {
   test("renders the TextField component", () => {
     render(
       <TextField
+        fieldType="String"
         jsonKey="verify_ssl"
         name="verify ssl"
         default=""

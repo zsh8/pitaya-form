@@ -47,6 +47,7 @@ export interface RawFieldProps {
 }
 
 export interface FieldProps {
+  fieldType: string;
   jsonKey: string;
   name: string;
   default: any;
@@ -69,7 +70,7 @@ interface OptionsProps {
  */
 const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   let {
-    type: fieldType,
+    type: fieldType = "String", // default field type is String
     array,
     order,
     description,
@@ -79,12 +80,17 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     ...otherProps
   } = props;
 
-  let fieldProps: any = { ...otherProps };
+  let fieldProps: {
+    fieldType: keyof typeof FieldTypesMap;
+    jsonKey: string;
+    events: { [key: string]: () => void };
+    [key: string]: any;
+  } = { ...otherProps, fieldType };
 
   let FieldComponent: any, valueType: string, typeDefaultValue: any;
 
   [FieldComponent, valueType, typeDefaultValue] =
-    FieldTypesMap[fieldType ? fieldType : "String"] || FieldTypesMap["String"]; // default field type is String
+    FieldTypesMap[fieldType] || FieldTypesMap["String"]; // undefined type could be shown as a String field
 
   if ((fieldType === "Choices" || fieldType === "File") && options.multiple) {
     valueType = "array";

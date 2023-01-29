@@ -7,6 +7,7 @@ describe("NumberField", () => {
   test("renders the NumberField component", () => {
     render(
       <NumberField
+        fieldType="Port"
         jsonKey="port"
         name="port"
         default={0}

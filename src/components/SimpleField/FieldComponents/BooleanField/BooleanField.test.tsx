@@ -7,6 +7,7 @@ describe("BooleanField", () => {
   test("renders the BooleanField component", () => {
     render(
       <BooleanField
+        fieldType="Boolean"
         jsonKey="verify_ssl"
         name="verify ssl"
         default={false}
