@@ -16,6 +16,7 @@ const Template: ComponentStory<typeof TextField> = (args) => (
 export const Primary = Template.bind({});
 Primary.args = {
   jsonKey: "text_field",
+  options: {},
 };
 
 export const TextFieldWithOptions = Template.bind({});

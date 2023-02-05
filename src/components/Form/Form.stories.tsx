@@ -136,7 +136,7 @@ HelloWorld.args = {
       default: null,
       order: -1,
       options: {
-        validators: [{ hostname: true }],
+        multiline: true,
       },
     },
 

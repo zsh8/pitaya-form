@@ -123,7 +123,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     rules: convertValidatorsToRules(
       validators,
       valueType,
-      validateLabel,
+      validateLabel as string,
       validateUnit
     ),
   };

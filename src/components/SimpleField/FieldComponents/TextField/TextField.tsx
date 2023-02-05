@@ -6,6 +6,8 @@ import "./TextField.css";
 const TextField = (props: FieldProps) => {
   let value = props.value;
 
+  const InputComponent = props.options.multiline ? Input.TextArea : Input;
+
   const {
     onChange: onChangeEvent,
     onBlur: onBlurEvent,
@@ -24,7 +26,7 @@ const TextField = (props: FieldProps) => {
     onBlurEvent?.();
   };
 
-  return <Input type="text" value={value} {...events} />;
+  return <InputComponent value={value} {...events} />;
 };
 
 export default TextField;
