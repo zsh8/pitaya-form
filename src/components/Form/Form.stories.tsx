@@ -12,6 +12,52 @@ export default {
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Form> = (args) => <Form {...args} />;
 
+export const httprestActionForm = Template.bind({});
+httprestActionForm.args = {
+  base_url: "http://127.0.0.1:8000",
+  form: {
+    country: {
+      name: "Countries",
+      type: "Choices",
+      options: {
+        choices: {
+          iran: { name: "Iran" },
+          afghanistan: { name: "Afghanistan" },
+        },
+        multiple: true,
+      },
+      events: {
+        change: ["get_cities"],
+      },
+      gid: "address",
+    },
+    city: {
+      name: "Cities",
+      type: "Choices",
+      options: {
+        choices: {
+          tehran: { name: "Tehran" },
+          esfahan: { name: "Esfahan" },
+        },
+      },
+      gid: "address",
+    },
+  },
+  groups: {
+    address: { array: false },
+  },
+  actions: {
+    get_cities: [
+      {
+        rpc: {
+          type: "http_rest",
+          name: "cities",
+        },
+      },
+    ],
+  },
+};
+
 export const removeActionForm = Template.bind({});
 removeActionForm.args = {
   form: {

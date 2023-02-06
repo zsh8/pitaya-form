@@ -41,14 +41,18 @@ export interface PitayaFormProps {
    */
   input?: { [key: string]: any };
   /**
-   * A function that will be balled by form submission
-   */
-  submit?: (values: any) => any;
-  /**
    * A piece of javascript code that could be used in
    * actions
    */
   js?: string;
+  /**
+   * A function that will be called by form submission
+   */
+  submit?: (values: any) => any;
+  /**
+   * Base url for http requests in http_rest type of rpc actions
+   */
+  base_url?: string;
 }
 
 const EventsMap = { click: "onClick", change: "onChange" } as const;
@@ -82,7 +86,7 @@ type ArgSpec = {
 interface RPCSpec {
   type: RPCType;
   name: string;
-  options?: object;
+  options?: { [key: string]: string };
   async?: boolean;
   arguments?: { [key: string]: ArgSpec };
   on_failure?: string[];
@@ -375,7 +379,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   }
 
   function makeRPCFunction(rpcSpec: RPCSpec) {
-    let rpcFunction = () => [];
+    let rpcFunction = () => null as any;
 
     switch (rpcSpec.type) {
       case "js":
@@ -383,13 +387,21 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
           (window as any)[rpcSpec.name](makeArguments(rpcSpec.arguments || {}));
 
         break;
+      case "http_rest":
+        rpcFunction = makeHttpRestFunction(rpcSpec);
+
+        break;
     }
-    return () => {
+    return async () => {
       let resultActions: (() => any)[] = [];
       try {
-        let actionSpecList = rpcFunction();
+        let actionSpecList = await rpcFunction();
         resultActions = convertActionsToFunctions(actionSpecList);
       } catch (error) {
+        if (typeof error === "object" && error !== null && "message" in error) {
+          console.log((error as Error).message);
+        }
+
         let actionNames = rpcSpec.on_failure || [];
         if (Array.isArray(actionNames)) {
           for (const act of actionNames) {
@@ -446,6 +458,56 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     return args;
   }
 
+  function makeHttpRestFunction(rpcSpec: RPCSpec) {
+    const method = rpcSpec.options?.method?.toUpperCase() || "GET";
+    const contentType = (rpcSpec.options?.content_type || "").toLowerCase();
+    let url: any;
+    try {
+      url = new URL(rpcSpec.name).toString();
+    } catch (error) {
+      url = new URL(rpcSpec.name, props.base_url).toString();
+    }
+
+    return () => {
+      let encodedParams: any = "";
+      const params = makeArguments(rpcSpec.arguments || {});
+
+      switch (contentType) {
+        case "multipart/form-data":
+          encodedParams = new FormData();
+          for (const key in params) {
+            encodedParams.append(key, params[key]);
+          }
+          break;
+        case "application/json":
+          encodedParams = JSON.stringify(params);
+          break;
+        case "application/x-www-form-urlencoded":
+        default:
+          encodedParams = new URLSearchParams(params).toString();
+      }
+
+      if (method === "GET" || !contentType) {
+        url = new URL(encodedParams, url).toString();
+      }
+
+      const requestOptions: { [key: string]: any } = {
+        method: method,
+      };
+
+      if (method !== "GET" && contentType) {
+        requestOptions["headers"] = {
+          "Content-Type": contentType,
+        };
+        requestOptions["body"] = encodedParams;
+      }
+
+      return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .then((data) => data);
+    };
+  }
+
   function createActionFunctionsMap(actionsSpec: PitayaFormProps["actions"]) {
     const actionsDict: StateSpec["actionFunctionsMap"] = {};
     for (const [actionKey, actionSpecList] of Object.entries(
@@ -466,9 +528,13 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       for (const [subActionKey, subActionSpec] of Object.entries(
         actionSpecItem || {}
       )) {
-        actionFunctions.push(
-          makeActionFunctions(subActionKey as ActionKey, subActionSpec)
-        );
+        try {
+          actionFunctions.push(
+            makeActionFunctions(subActionKey as ActionKey, subActionSpec)
+          );
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
     return actionFunctions;
