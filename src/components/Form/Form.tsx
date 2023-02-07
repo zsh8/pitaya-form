@@ -379,12 +379,12 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   }
 
   function makeRPCFunction(rpcSpec: RPCSpec) {
-    let rpcFunction = async () => null as any;
+    let rpcFunction = () => null as any;
     const isAsync = rpcSpec.async || false;
 
     switch (rpcSpec.type) {
       case "js":
-        rpcFunction = async () =>
+        rpcFunction = () =>
           (window as any)[rpcSpec.name](makeArguments(rpcSpec.arguments || {}));
 
         break;
@@ -396,11 +396,10 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     return () => {
       let resultActions: (() => any)[] = [];
 
-      const rpcPromise = rpcFunction()
-        .then(
-          (actionSpecList: ActionProps[]) =>
-            (resultActions = convertActionsToFunctions(actionSpecList))
-        )
+      const rpcPromise = Promise.resolve(rpcFunction())
+        .then((actionSpecList: ActionProps[]) => {
+          resultActions = convertActionsToFunctions(actionSpecList);
+        })
         .catch((error: any) => {
           if (
             typeof error === "object" &&
@@ -419,16 +418,19 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
             }
           }
         })
-        .then(() => {
+        .then(async () => {
           for (const actFunc of resultActions) {
-            actFunc();
+            const actResult = actFunc();
+            if (
+              actResult &&
+              typeof actResult === "object" &&
+              typeof actResult.then === "function"
+            )
+              await actResult;
           }
         });
 
-      if (!isAsync)
-        (async () => {
-          await rpcPromise;
-        })();
+      if (!isAsync) return rpcPromise;
     };
   }
 
@@ -547,7 +549,13 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
             makeActionFunctions(subActionKey as ActionKey, subActionSpec)
           );
         } catch (error) {
-          console.log(error);
+          if (
+            typeof error === "object" &&
+            error !== null &&
+            "message" in error
+          ) {
+            console.log((error as Error).message);
+          }
         }
       }
     }
@@ -574,9 +582,15 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         }
       }
       fieldEvents[EventsMap[eventKey as keyof typeof EventsMap] || "onClick"] =
-        () => {
+        async () => {
           for (const actFunc of eventActions) {
-            actFunc();
+            const actResult = actFunc();
+            if (
+              actResult &&
+              typeof actResult === "object" &&
+              typeof actResult.then === "function"
+            )
+              await actResult;
           }
         };
     }
@@ -636,29 +650,24 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   }
 
   return (
-    <>
-      <Form
-        form={form}
-        initialValues={initialInput}
-        layout={"vertical"}
-        colon={false}
-        validateMessages={defaultValidateMessages}
-        onFinish={props.submit || handleSubmit}>
-        <Row>
-          {formChildren.map((formChild, index) => (
-            <Col
-              key={index}
-              order={Number(formChild.props.order) || 0}
-              span={24}>
-              {formChild}
-            </Col>
-          ))}
-        </Row>
-        <Button type="primary" htmlType="submit">
-          save
-        </Button>
-      </Form>
-    </>
+    <Form
+      form={form}
+      initialValues={initialInput}
+      layout={"vertical"}
+      colon={false}
+      validateMessages={defaultValidateMessages}
+      onFinish={props.submit || handleSubmit}>
+      <Row>
+        {formChildren.map((formChild, index) => (
+          <Col key={index} order={Number(formChild.props.order) || 0} span={24}>
+            {formChild}
+          </Col>
+        ))}
+      </Row>
+      <Button type="primary" htmlType="submit">
+        save
+      </Button>
+    </Form>
   );
 };
 

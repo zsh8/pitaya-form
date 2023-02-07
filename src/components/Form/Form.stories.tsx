@@ -27,7 +27,7 @@ httprestActionForm.args = {
         multiple: true,
       },
       events: {
-        change: ["get_cities"],
+        change: ["get_cities", "add_details"],
       },
       gid: "address",
     },
@@ -52,6 +52,16 @@ httprestActionForm.args = {
         rpc: {
           type: "http_rest",
           name: "cities",
+        },
+      },
+    ],
+    add_details: [
+      {
+        update: {
+          form: {
+            details: { name: "Details", type: "String", gid: "advanced" },
+            conditions: { name: "Conditions", type: "String", gid: "advanced" },
+          },
         },
       },
     ],
