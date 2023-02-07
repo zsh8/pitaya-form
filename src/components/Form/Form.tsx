@@ -379,11 +379,12 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   }
 
   function makeRPCFunction(rpcSpec: RPCSpec) {
-    let rpcFunction = () => null as any;
+    let rpcFunction = async () => null as any;
+    const isAsync = rpcSpec.async || false;
 
     switch (rpcSpec.type) {
       case "js":
-        rpcFunction = () =>
+        rpcFunction = async () =>
           (window as any)[rpcSpec.name](makeArguments(rpcSpec.arguments || {}));
 
         break;
@@ -392,29 +393,42 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
 
         break;
     }
-    return async () => {
+    return () => {
       let resultActions: (() => any)[] = [];
-      try {
-        let actionSpecList = await rpcFunction();
-        resultActions = convertActionsToFunctions(actionSpecList);
-      } catch (error) {
-        if (typeof error === "object" && error !== null && "message" in error) {
-          console.log((error as Error).message);
-        }
 
-        let actionNames = rpcSpec.on_failure || [];
-        if (Array.isArray(actionNames)) {
-          for (const act of actionNames) {
-            if (act in state.actionFunctionsMap) {
-              resultActions.push(...state.actionFunctionsMap[act]);
+      const rpcPromise = rpcFunction()
+        .then(
+          (actionSpecList: ActionProps[]) =>
+            (resultActions = convertActionsToFunctions(actionSpecList))
+        )
+        .catch((error: any) => {
+          if (
+            typeof error === "object" &&
+            error !== null &&
+            "message" in error
+          ) {
+            console.log((error as Error).message);
+          }
+
+          let actionNames = rpcSpec.on_failure || [];
+          if (Array.isArray(actionNames)) {
+            for (const act of actionNames) {
+              if (act in state.actionFunctionsMap) {
+                resultActions.push(...state.actionFunctionsMap[act]);
+              }
             }
           }
-        }
-      }
+        })
+        .then(() => {
+          for (const actFunc of resultActions) {
+            actFunc();
+          }
+        });
 
-      for (const actFunc of resultActions) {
-        actFunc();
-      }
+      if (!isAsync)
+        (async () => {
+          await rpcPromise;
+        })();
     };
   }
 
