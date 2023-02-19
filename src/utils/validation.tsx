@@ -172,7 +172,7 @@ export function convertValidatorsToRules(
 
         value = value.trim();
         // check the value is IPv6 or IPv4
-        // if (isIP(value)) return Promise.resolve();
+        if (isIP(value)) return Promise.resolve();
 
         // check the value is a valid hostname
         if (value && value.slice(-1) === ".") {
