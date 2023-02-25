@@ -92,28 +92,31 @@ interface RPCSpec {
   on_failure?: string[];
 }
 
-type UpdateActionOptions = { extend_arrays?: boolean };
+type ModifyActionOptions = { extend_arrays?: boolean };
 
-type UpdateActionSpec = Partial<PitayaFormProps> & UpdateActionOptions;
+type ModifyActionSpec = Partial<PitayaFormProps> & ModifyActionOptions;
 
 interface StateSpec extends Omit<PitayaFormProps, "submit" | "input"> {
   actionFunctionsMap: { [key: string]: (() => any)[] };
-  inputChanges: Partial<PitayaFormProps["input"]>;
-  changeInput: boolean;
-  changesType: "update" | "remove";
+  inputChangesList: Partial<PitayaFormProps["input"]>[];
+  modifyInput: boolean;
+  modifyType: "update" | "remove";
   extendArrayInMerge: boolean;
 }
 
 type ReducerAction = {
-  type: "update" | "remove";
-  changes: Partial<PitayaFormProps>;
+  type: "modify" | "resetInputChanges";
+  changes?: Partial<PitayaFormProps>;
+  modifyType?: StateSpec["modifyType"];
   extendArrays?: boolean;
 };
 
 function makeJsFunctions(jsCode: string) {
   try {
     eval?.(jsCode);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function isObject(obj: any) {
@@ -140,9 +143,9 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
     let initialState: StateSpec = {
       ...otherProps,
       actionFunctionsMap: createActionFunctionsMap(props.actions),
-      inputChanges: {},
-      changeInput: false,
-      changesType: "update",
+      inputChangesList: [],
+      modifyInput: false,
+      modifyType: "update",
       extendArrayInMerge: false,
     };
     makeJsFunctions(initialState.js || "");
@@ -153,38 +156,44 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   const [state, dispatch] = useReducer(
     (state: StateSpec, action: ReducerAction) => {
       let newState = { ...state };
-      newState.changesType = action.type;
-      newState.extendArrayInMerge = action.extendArrays || false;
-      newState.changeInput = false;
-
-      const { input: inputChanges, ...otherChanges } = action.changes;
 
       switch (action.type) {
-        case "update":
-          newState = deepMergeObject(
-            newState,
-            otherChanges,
-            newState.extendArrayInMerge
-          );
+        case "resetInputChanges":
+          newState.modifyInput = false;
+          newState.inputChangesList = [];
           break;
-        case "remove":
-          newState = deepRemoveProperties(newState, otherChanges);
-          break;
-      }
+        case "modify":
+          newState.modifyType = action.modifyType || "update";
+          newState.extendArrayInMerge = action.extendArrays || false;
+          const { input: inputChanges, ...otherChanges } = action.changes || {};
 
-      if (isObject(inputChanges)) {
-        newState.changeInput = true;
-        newState.inputChanges = inputChanges;
-      }
+          switch (action.modifyType) {
+            case "update":
+              newState = deepMergeObject(
+                newState,
+                otherChanges,
+                newState.extendArrayInMerge
+              );
+              break;
+            case "remove":
+              newState = deepRemoveProperties(newState, otherChanges);
+              break;
+          }
 
-      if ("actions" in otherChanges) {
-        newState.actionFunctionsMap = createActionFunctionsMap(
-          newState.actions
-        );
-      }
+          if (isObject(inputChanges)) {
+            newState.modifyInput = true;
+            newState.inputChangesList.push(inputChanges);
+          }
 
-      if ("js" in otherChanges) {
-        makeJsFunctions(newState.js || "");
+          if ("actions" in otherChanges) {
+            newState.actionFunctionsMap = createActionFunctionsMap(
+              newState.actions
+            );
+          }
+
+          if ("js" in otherChanges) {
+            makeJsFunctions(newState.js || "");
+          }
       }
 
       return newState;
@@ -194,11 +203,11 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
   );
 
   useEffect(() => {
-    if (state.changeInput) {
-      const fieldsValue = convertInputChangesToFieldsValue(
-        state.inputChanges as {}
-      );
-      form.setFieldsValue(fieldsValue);
+    if (state.modifyInput) {
+      for (const changes of state.inputChangesList) {
+        form.setFieldsValue(convertInputChangesToFieldsValue(changes));
+      }
+      dispatch({ type: "resetInputChanges" });
     }
   });
 
@@ -211,7 +220,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
       const fieldNamePath = [...parentNamePath, fieldKey];
       if (isObject(value)) {
         if (Object.keys(value as {}).length === 0) {
-          if (state.changesType === "remove") fieldsValue[fieldKey] = null;
+          if (state.modifyType === "remove") fieldsValue[fieldKey] = null;
         } else {
           fieldsValue[fieldKey] = convertInputChangesToFieldsValue(
             value as {},
@@ -219,7 +228,7 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
           );
         }
       } else {
-        if (state.changesType === "update") {
+        if (state.modifyType === "update") {
           // in case of update action
           if (state.extendArrayInMerge && Array.isArray(value)) {
             // if current value is undefined or null
@@ -259,26 +268,31 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
         return makeRPCFunction(actionSpec as RPCSpec);
       case "update":
       case "remove":
-        return makeUpdateFunction(actionSpec as UpdateActionSpec, actionKey);
+        return makeModifyFunction(actionSpec as ModifyActionSpec, actionKey);
     }
     return () => null;
   }
 
-  function makeUpdateFunction(
-    updateSpec: UpdateActionSpec,
+  function makeModifyFunction(
+    modifySpec: ModifyActionSpec,
     actionKey: "remove" | "update"
   ) {
-    if (!isObject(updateSpec))
-      // if updateSpec is not a real object, then
+    if (!isObject(modifySpec))
+      // if modifySpec is not a real object, then
       // an empty function should be returned
       return () => null;
 
     const { extend_arrays: extendArrays = false, ...changes } = {
-      ...updateSpec,
+      ...modifySpec,
     };
 
     return () => {
-      dispatch({ type: actionKey, changes, extendArrays });
+      dispatch({
+        type: "modify",
+        modifyType: actionKey,
+        changes,
+        extendArrays,
+      });
     };
   }
 
