@@ -10,7 +10,8 @@
     "rollup": "rollup -c",
     "test": "jest",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "make-stories": "node make-stories.js src/stories/Fields\\ Actions src/stories/Fields\\ Validation/ src/stories/Form\\ Fields"
   },
   "author": "Zahra Shamsi",
   "license": "GPL-3.0",
@@ -42,6 +43,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
+    "js-yaml": "^4.1.0",
     "postcss-import": "^15.1.0",
     "rollup": "^2.79.1",
     "rollup-plugin-dts": "^4.2.3",

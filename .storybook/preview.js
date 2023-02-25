@@ -6,4 +6,12 @@ export const parameters = {
       date: /Date$/,
     },
   },
-}
+  options: {
+    storySort: {
+      order: [
+        "PitayaForm",
+        ["Form Fields", "Fields Validation", "Fields Actions"],
+      ],
+    },
+  },
+};
