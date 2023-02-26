@@ -1,7 +1,8 @@
 {
-  "name": "@zsh8/pitaya-form",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/zsh8"
+  "name": "pitaya-form",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zsh8/pitaya-form"
   },
   "version": "0.0.1",
   "description": "Implement pitaya forms",
@@ -12,7 +13,7 @@
     "build-storybook": "build-storybook"
   },
   "author": "Zahra Shamsi",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "devDependencies": {
     "@babel/core": "^7.20.2",
     "@babel/preset-env": "^7.20.2",
