@@ -1,0 +1,111 @@
+* PitayaForm
+
+*pitaya-form* is a react component library that builds dynamic forms described according to [[https://github.com/admirito/pitaya-form/][PitayaForm specification]]
+If you are going to have a lot of forms with various fields and don't want to be stuck in a lot of react coding for your forms, then =pitaya-form= is a good choice. You just need to write your forms specification according to [[https://github.com/admirito/pitaya-form/][PitayaForm specification]]
+
+** Installation
+
+Install pitaya-form using npm inside your existing react application. If you don't have a react application, use this [[https://reactjs.org/docs/create-a-new-react-app.html][tutorial]] to create one:
+
+#+begin_src js
+npm install pitaya-form --save
+#+end_src
+
+** Getting started with PitayaForm
+
+Here is an example of a basic app using =PitayaForm= component:
+
+#+begin_src js
+import { PitayaForm } from 'pitaya-form';
+
+const formProps = {
+  version:"1",
+  form: {
+    name: { name: "Server name" },
+    port: {
+      name: "Port",
+      long_description: "Left empty to use default port",
+      type: "Port",
+      default: null,
+      gid: "connection_info",
+      order: 1,
+    },
+    host: {
+      type: "Hostname",
+      name: "Host name",
+      gid: "connection_info",
+    },
+  },
+  groups: {
+    connection_info: {
+      name: "Connection Info",
+    },
+  },
+};
+
+function App() {
+  return (
+      <PitayaForm {...formProps} />
+  );
+}
+
+export default App;
+#+end_src
+
+You could separate your form specification in a json file or even a *[[https://yaml.org/][yaml]]* file and use it in this way:
+
+#+begin_src js
+import { PitayaForm } from 'pitaya-form';
+
+const fs = require('fs');
+const yaml = require("js-yaml");
+
+const formProps = yaml.load(fs.readFileSync('./formProps.yaml', 'utf8'));
+// using json file it would be like this
+// const formProps = JSON.parse(fs.readFileSync('./formProps.json', 'utf8'));
+
+function App() {
+  return (
+      <PitayaForm {...formProps} />
+  );
+}
+
+export default App;
+
+#+end_src
+
+in case of using yaml files to describe your forms specification, you need to add a yaml parser to your dependencies:
+
+#+begin_src js
+npm install --save-dev js-yaml 
+#+end_src
+
+The output form of the above code will be like this:
+
+[[./readme-example.png]]
+
+** Dependencies
+
+=PitayaForm= has a few dependencies and most are managed by NPM automatically. However the following peer dependencies must be specified by your project in order to avoid version conflicts. NPM will not automatically install these for you but it will show you a warning message with instructions on how to install them:
+
+ =react=, =react-dom=, =antd=, =is-ip=, =jsonpath=
+
+** Examples
+
+Here are some online demos of PitayaForm component:
+
+- All Fields
+- Fields Validation
+- Fields Actions
+
+** Contributing
+
+This is a initial implementation of [[https://github.com/admirito/pitaya-form/][PitayaForm specification]] and needs to be improved and completed.
+
+Read the contributing guide to learn about the development process, how to propose bug fixes and improvements, and how to build and test your changes.
+
+Use [[https://github.com/zsh8/pitaya-form/issues][GitHub issues]] for requests.
+    
+** Authors
+
+- Zahra Shamsi
