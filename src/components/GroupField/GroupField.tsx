@@ -25,12 +25,24 @@ const GroupField: React.FC<GroupProps> = (props: GroupProps) => {
     parentPath,
   } = props;
 
-  let title = {};
-  if (props.name || description) {
+  let styles: any = {
+    bordered: false,
+    headStyle: {
+      backgroundColor: "#f0f0f0",
+      width: "max-content",
+      border: "1px solid #d9d9d9",
+      borderRadius: "5px 5px 0 0 ",
+      fontWeight: "400",
+    },
+    bodyStyle: {
+      border: "1px solid #d9d9d9",
+      borderRadius: "0 5px 5px 5px ",
+    },
+  };
+
+  if (props.name) {
     const tooltipTitle = description ? { title: description } : {};
-    title = {
-      title: <Tooltip {...tooltipTitle}>{props.name}</Tooltip>,
-    };
+    styles["title"] = <Tooltip {...tooltipTitle}>{props.name}</Tooltip>;
   }
 
   interface ChangeAction {
@@ -83,29 +95,35 @@ const GroupField: React.FC<GroupProps> = (props: GroupProps) => {
     );
   }
   return array ? (
-    <Form.List name={groupPath} initialValue={groupDefault}>
-      {(fields, { add, remove }) => (
-        <>
-          {fields.map((field) => (
-            <Space
-              key={field.key}
-              style={{ display: "flex", marginBottom: 2 }}
-              align="start">
-              <Card {...title}>{makeChildren(field.name)}</Card>
-
-              <MinusCircleOutlined onClick={() => remove(field.name)} />
-            </Space>
-          ))}
-          <Form.Item>
-            <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
-              {`Add ${props.name || props.jsonKey}`}
-            </Button>
-          </Form.Item>
-        </>
-      )}
-    </Form.List>
+    <Form.Item>
+      <Form.List name={groupPath} initialValue={groupDefault}>
+        {(fields, { add, remove }) => (
+          <>
+            {fields.map((field) => (
+              <Space
+                key={field.key}
+                style={{ display: "flex", marginBottom: 8 }}
+                align="center">
+                <Card {...styles}>{makeChildren(field.name)}</Card>
+                <MinusCircleOutlined onClick={() => remove(field.name)} />
+              </Space>
+            ))}
+            <Form.Item>
+              <Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}>
+                {`Add ${props.name || props.jsonKey}`}
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
+    </Form.Item>
   ) : (
-    <Card {...title}>{makeChildren()}</Card>
+    <Form.Item>
+      <Card {...styles}>{makeChildren()}</Card>
+    </Form.Item>
   );
 };
 

@@ -162,7 +162,11 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
                 key={field.key}
                 style={{ display: "flex", marginBottom: 2 }}
                 align="baseline">
-                <Form.Item {...field} {...rules} validateTrigger="onBlur">
+                <Form.Item
+                  {...field}
+                  {...rules}
+                  validateTrigger="onBlur"
+                  noStyle>
                   <FieldComponent {...fieldProps} />
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(field.name)} />

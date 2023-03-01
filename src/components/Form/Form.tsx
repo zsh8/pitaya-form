@@ -678,9 +678,11 @@ const PitayaForm: React.FC<PitayaFormProps> = (props: PitayaFormProps) => {
           </Col>
         ))}
       </Row>
-      <Button type="primary" htmlType="submit">
-        save
-      </Button>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          save
+        </Button>
+      </Form.Item>
     </Form>
   );
 };
