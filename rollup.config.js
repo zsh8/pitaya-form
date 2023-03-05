@@ -2,6 +2,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import postcss from "rollup-plugin-postcss";
+import postcssImport from "postcss-import";
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
@@ -29,8 +30,13 @@ export default [
       peerDepsExternal(),
       resolve(),
       commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
-      postcss(),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        exclude: ["**/src/stories/**", "**/*.stories.tsx", "**/*.test.tsx"],
+      }),
+      postcss({
+        plugins: [postcssImport()],
+      }),
       terser(),
     ],
   },
