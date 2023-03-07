@@ -104,7 +104,6 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   // fields with null name or "Submit" type should hava no label in the form
   const showLabel = fieldProps.name !== null && fieldType !== "Submit";
   fieldProps.name = fieldProps.name?.toString() || fieldProps.jsonKey;
-  let label = showLabel ? { label: fieldProps.name } : null;
 
   const { validators = [], ...restOptions } = options;
   fieldProps.options = restOptions;
@@ -128,16 +127,20 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
     ),
   };
 
-  let help = {};
+  let labelTitle = {};
   if (description) {
-    // TODO: check trim tooltip in form items
+    // trim description to at most 120 characters
     let title = description.toString().slice(0, 120);
     if (description.toString().length > 120) {
       title = title + " ...";
     }
-    // TODO: check adding simple title to form items
-    // help = { help: title };
+    labelTitle = { title };
   }
+
+  let label = showLabel
+    ? { label: <span {...labelTitle}>{fieldProps.name}</span> }
+    : null;
+
   let tooltip;
   if (long_description) {
     tooltip = { tooltip: long_description };
@@ -153,7 +156,7 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
   let fieldPath = [...parentPath, fieldProps.jsonKey];
 
   return array ? (
-    <Form.Item {...label} {...tooltip} {...help}>
+    <Form.Item {...label} {...tooltip}>
       <Form.List name={fieldPath} initialValue={fieldProps.default}>
         {(fields, { add, remove }) => (
           <>
@@ -190,7 +193,6 @@ const SimpleField: React.FC<RawFieldProps> = (props: RawFieldProps) => {
       initialValue={fieldProps.default}
       {...label}
       {...tooltip}
-      {...help}
       {...rules}
       validateTrigger="onBlur">
       <FieldComponent {...fieldProps} />
