@@ -1,4 +1,4 @@
-import { Tooltip, TreeSelect } from "antd";
+import { Tooltip, Select, TreeSelect } from "antd";
 import React, { ReactNode } from "react";
 import type { FieldProps } from "../..";
 import "./ChoicesField.css";
@@ -13,7 +13,7 @@ interface OptionDetails {
   };
 }
 
-function makeOptions(
+function makeTreeData(
   choices: {
     [key: string | number]: OptionDetails;
   },
@@ -31,7 +31,7 @@ function makeOptions(
       title: (
         <Tooltip title={choices[key].description}>{choices[key].name}</Tooltip>
       ),
-      children: makeOptions(choices[key].choices || {}, selectable_parents),
+      children: makeTreeData(choices[key].choices || {}, selectable_parents),
     };
     // if selectable_parents is false set selectable to false for parent nodes
     if (!selectable_parents && treeNode.children.length > 0)
@@ -41,21 +41,47 @@ function makeOptions(
   return treeData;
 }
 
+function makeSelectOptions(
+  choices: {
+    [key: string | number]: OptionDetails;
+  },
+  level: number = 0
+): object[] {
+  let optionsData = [];
+  for (const key in choices) {
+    let option: {
+      value: string;
+      label?: ReactNode;
+      options?: object[];
+    } = {
+      value: key,
+      label: (
+        <Tooltip title={choices[key].description}>{choices[key].name}</Tooltip>
+      ),
+    };
+    // Select supports just one level of nested options
+    if (level === 0) {
+      const nestedOptions = makeSelectOptions(choices[key].choices || {}, 1);
+      if (nestedOptions.length > 0) {
+        option["options"] = nestedOptions;
+      }
+    }
+    optionsData.push(option);
+  }
+  return optionsData;
+}
+
 const ChoicesField = (props: FieldProps) => {
   let value = props.value;
 
-  const choices: {
-    [key: string | number]: OptionDetails;
-  } = props.options?.choices || {};
+  const {
+    choices = {},
+    multiple = false,
+    arbitrary_entry_prefix: arbitraryEntryPrefix = null,
+    selectable_parents: selectableParents = false,
+  } = props.options;
 
-  let treeData = makeOptions(
-    choices,
-    props.options?.selectable_parents || false
-  );
-
-  // TODO: implement arbitrary_entry_prefix to add user input options
-  // useful link https://codesandbox.io/s/antd-select-add-option-cr6ii?file=/index.js:307-316
-
+  // TODO: add arbitrary_entry_prefix to user input options
   const handleChange = (value: any) => {
     props.onChange(value);
     props.onBlur(value);
@@ -79,23 +105,42 @@ const ChoicesField = (props: FieldProps) => {
     onBlurEvent?.();
   };
 
-  return (
+  const commonProps = {
+    value: value,
+    showSearch: true,
+    allowClear: true,
+    dropdownStyle: { maxHeight: 400, overflow: "auto" },
+    dropdownMatchSelectWidth: false,
+    placeholder: "Please select",
+    ...events,
+  };
+
+  return arbitraryEntryPrefix !== null && multiple ? (
+    <Select
+      mode="tags"
+      options={makeSelectOptions(choices)}
+      optionFilterProp="label"
+      filterOption={(inputValue: string, option: any) => {
+        const filterValue =
+          typeof option.label === "object"
+            ? option.label.props.children
+            : option.label;
+
+        return filterValue.match(new RegExp(inputValue, "i"));
+      }}
+      {...commonProps}
+    />
+  ) : (
     <TreeSelect
-      value={value}
-      multiple={props.options?.multiple || false}
-      showSearch
-      allowClear
-      treeData={treeData}
+      multiple={multiple}
+      treeData={makeTreeData(choices, selectableParents)}
       treeNodeFilterProp="title"
       // search on tree nodes base on titles instead of value
       filterTreeNode={(inputValue: string, treeNode: any) => {
         return treeNode.title.props.children.match(new RegExp(inputValue, "i"));
       }}
       treeDefaultExpandAll
-      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-      dropdownMatchSelectWidth={false}
-      placeholder="Please select"
-      {...events}
+      {...commonProps}
     />
   );
 };
