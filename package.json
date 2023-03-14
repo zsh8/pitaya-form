@@ -10,7 +10,8 @@
     "rollup": "rollup -c",
     "test": "jest",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "prepublishOnly": "pandoc -f org -t gfm -o README.md README.org"
   },
   "author": "Zahra Shamsi",
   "license": "GPL-3.0",
